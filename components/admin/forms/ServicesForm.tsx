@@ -1,6 +1,7 @@
+
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
-import { Input, Textarea } from './FormElements';
+import { Input, Textarea, FormCard } from './FormElements';
 import { defaultContent } from '../../../contexts/ContentContext';
 
 type Plan = {
@@ -59,20 +60,22 @@ const ServicesForm: React.FC = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-lg shadow-md">
-            <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Edit Services Section</h2>
-                <div className="space-y-4 mb-8">
-                    <Input label="Headline" id="headline" value={formData.headline} onChange={e => handleInputChange('headline', e.target.value)} />
-                    <Textarea label="Subheading" id="subheading" value={formData.subheading} onChange={e => handleInputChange('subheading', e.target.value)} />
-                </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Edit Services Section</h2>
 
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Service Plans</h3>
+            <FormCard title="Main Content" onReset={handleReset}>
+                <Input label="Headline" id="headline" value={formData.headline} onChange={e => handleInputChange('headline', e.target.value)} />
+                <Textarea label="Subheading" id="subheading" value={formData.subheading} onChange={e => handleInputChange('subheading', e.target.value)} />
+            </FormCard>
+            
+            <FormCard title="Service Plans">
                 <div className="space-y-6">
                     {formData.plans.map((plan, index) => (
-                        <div key={index} className="p-6 border rounded-lg space-y-4 relative">
-                            <h4 className="font-semibold text-lg text-gray-700">Plan {index + 1}</h4>
-                             <button type="button" onClick={() => removePlan(index)} className="absolute top-4 right-4 text-red-600 hover:text-red-800 font-bold">X</button>
+                        <div key={index} className="p-4 bg-gray-50 border rounded-lg space-y-4 relative">
+                            <div className="flex justify-between items-center">
+                                <h4 className="font-semibold text-lg text-gray-700">Plan {index + 1}</h4>
+                                <button type="button" onClick={() => removePlan(index)} className="text-red-500 hover:text-red-700 text-sm font-bold">Remove</button>
+                            </div>
                              
                             <div className="flex items-center">
                                 <input type="checkbox" id={`popular-${index}`} checked={plan.popular} onChange={e => handlePlanChange(index, 'popular', e.target.checked)} className="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500"/>
@@ -86,19 +89,14 @@ const ServicesForm: React.FC = () => {
                         </div>
                     ))}
                 </div>
-                 <button type="button" onClick={addPlan} className="mt-6 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">+ Add New Plan</button>
-            </div>
+                 <button type="button" onClick={addPlan} className="mt-6 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-semibold">+ Add New Plan</button>
+            </FormCard>
 
-            <div className="flex items-center justify-between mt-8 pt-6 border-t">
-                <button type="submit" className="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-800 transition-colors">Save Changes</button>
-                <button 
-                    type="button" 
-                    onClick={handleReset} 
-                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
-                >
-                    Reset Section
-                </button>
-                {status && <p className="text-green-600 font-semibold">{status}</p>}
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mt-6">
+                <div className="flex items-center justify-between">
+                    <button type="submit" className="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-800 transition-colors">Save Changes</button>
+                    {status && <p className="text-green-600 font-semibold text-sm">{status}</p>}
+                </div>
             </div>
         </form>
     );

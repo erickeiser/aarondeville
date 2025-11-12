@@ -1,6 +1,7 @@
+
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
-import { Input, Textarea, ImageInput } from './FormElements';
+import { Input, Textarea, ImageInput, FormCard } from './FormElements';
 import { defaultContent } from '../../../contexts/ContentContext';
 
 type Story = {
@@ -12,7 +13,11 @@ type Story = {
     tag: string;
 }
 
-const TestimonialsForm: React.FC = () => {
+interface TestimonialsFormProps {
+    openMediaLibrary: (onSelect: (url: string) => void) => void;
+}
+
+const TestimonialsForm: React.FC<TestimonialsFormProps> = ({ openMediaLibrary }) => {
     const { content, setContent } = useContent();
     const [formData, setFormData] = useState(content.testimonials);
     const [status, setStatus] = useState('');
@@ -71,20 +76,22 @@ const TestimonialsForm: React.FC = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 rounded-lg shadow-md">
-            <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Edit Testimonials Section</h2>
-                <div className="space-y-4 mb-8">
-                    <Input label="Headline" id="headline" value={formData.headline} onChange={e => handleInputChange('headline', e.target.value)} />
-                    <Textarea label="Subheading" id="subheading" value={formData.subheading} onChange={e => handleInputChange('subheading', e.target.value)} />
-                </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Edit Testimonials Section</h2>
 
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Client Stories</h3>
+            <FormCard title="Main Content" onReset={handleReset}>
+                <Input label="Headline" id="headline" value={formData.headline} onChange={e => handleInputChange('headline', e.target.value)} />
+                <Textarea label="Subheading" id="subheading" value={formData.subheading} onChange={e => handleInputChange('subheading', e.target.value)} />
+            </FormCard>
+            
+            <FormCard title="Client Stories">
                 <div className="space-y-6">
                     {formData.stories.map((story, index) => (
-                        <div key={index} className="p-6 border rounded-lg space-y-4 relative">
-                            <h4 className="font-semibold text-lg text-gray-700">Testimonial {index + 1}</h4>
-                            <button type="button" onClick={() => removeStory(index)} className="absolute top-4 right-4 text-red-600 hover:text-red-800 font-bold">X</button>
+                        <div key={index} className="p-4 bg-gray-50 border rounded-lg space-y-4 relative">
+                            <div className="flex justify-between items-center">
+                                <h4 className="font-semibold text-lg text-gray-700">Testimonial {index + 1}</h4>
+                                <button type="button" onClick={() => removeStory(index)} className="text-red-500 hover:text-red-700 text-sm font-bold">Remove</button>
+                            </div>
                             
                             <Input label="Name" id={`name-${index}`} value={story.name} onChange={e => handleStoryChange(index, 'name', e.target.value)} />
                             <Input label="Achievement" id={`achievement-${index}`} value={story.achievement} onChange={e => handleStoryChange(index, 'achievement', e.target.value)} />
@@ -96,6 +103,7 @@ const TestimonialsForm: React.FC = () => {
                                 value={story.imageUrl} 
                                 onChange={e => handleStoryChange(index, 'imageUrl', e.target.value)}
                                 onGenerate={() => handleGenerateStoryImage(index)}
+                                onSelect={() => openMediaLibrary(url => handleStoryChange(index, 'imageUrl', url))}
                             />
                             <ImageInput 
                                 label="Avatar URL" 
@@ -103,23 +111,19 @@ const TestimonialsForm: React.FC = () => {
                                 value={story.avatarUrl} 
                                 onChange={e => handleStoryChange(index, 'avatarUrl', e.target.value)}
                                 onGenerate={() => handleGenerateAvatarImage(index)}
+                                onSelect={() => openMediaLibrary(url => handleStoryChange(index, 'avatarUrl', url))}
                             />
                         </div>
                     ))}
                 </div>
-                 <button type="button" onClick={addStory} className="mt-6 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">+ Add New Testimonial</button>
-            </div>
-
-            <div className="flex items-center justify-between mt-8 pt-6 border-t">
-                <button type="submit" className="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-800 transition-colors">Save Changes</button>
-                <button 
-                    type="button" 
-                    onClick={handleReset} 
-                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
-                >
-                    Reset Section
-                </button>
-                {status && <p className="text-green-600 font-semibold">{status}</p>}
+                 <button type="button" onClick={addStory} className="mt-6 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-semibold">+ Add New Testimonial</button>
+            </FormCard>
+            
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mt-6">
+                <div className="flex items-center justify-between">
+                    <button type="submit" className="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-800 transition-colors">Save Changes</button>
+                    {status && <p className="text-green-600 font-semibold text-sm">{status}</p>}
+                </div>
             </div>
         </form>
     );
