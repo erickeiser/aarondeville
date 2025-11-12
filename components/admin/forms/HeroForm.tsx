@@ -1,11 +1,16 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea, ImageInput } from './FormElements';
+import { defaultContent } from '../../../contexts/ContentContext';
 
 const HeroForm: React.FC = () => {
     const { content, setContent } = useContent();
     const [formData, setFormData] = useState(content.hero);
     const [status, setStatus] = useState('');
+
+    useEffect(() => {
+        setFormData(content.hero);
+    }, [content.hero]);
 
     const handleInputChange = (key: keyof typeof formData, value: string) => {
         setFormData(prev => ({ ...prev, [key]: value }));
@@ -28,6 +33,14 @@ const HeroForm: React.FC = () => {
         setContent({ ...content, hero: formData });
         setStatus('Hero section saved successfully!');
         setTimeout(() => setStatus(''), 3000);
+    };
+
+    const handleReset = () => {
+        if (window.confirm("Are you sure you want to reset the Hero section to its default content? This will update the database.")) {
+            setContent({ ...content, hero: defaultContent.hero });
+            setStatus('Hero section has been reset to default.');
+            setTimeout(() => setStatus(''), 3000);
+        }
     };
 
     return (
@@ -62,6 +75,13 @@ const HeroForm: React.FC = () => {
 
             <div className="flex items-center justify-between mt-8 pt-6 border-t">
                 <button type="submit" className="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-800 transition-colors">Save Changes</button>
+                 <button 
+                    type="button" 
+                    onClick={handleReset} 
+                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
+                >
+                    Reset Section
+                </button>
                 {status && <p className="text-green-600 font-semibold">{status}</p>}
             </div>
         </form>

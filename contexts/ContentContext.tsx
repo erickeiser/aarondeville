@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { SiteContent } from '../types';
 import { supabase } from '../lib/supabaseClient';
 
-const defaultContent: SiteContent = {
+export const defaultContent: SiteContent = {
   header: {
     siteName: 'Ari Deville Fitness',
     navLinks: {

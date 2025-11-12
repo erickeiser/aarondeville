@@ -1,11 +1,16 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea } from './FormElements';
+import { defaultContent } from '../../../contexts/ContentContext';
 
 const ContactForm: React.FC = () => {
     const { content, setContent } = useContent();
     const [formData, setFormData] = useState(content.contact);
     const [status, setStatus] = useState('');
+
+    useEffect(() => {
+        setFormData(content.contact);
+    }, [content.contact]);
 
     const handleInputChange = (section: keyof typeof formData, key: any, value: any, subKey?: any) => {
         setFormData(prev => {
@@ -36,6 +41,14 @@ const ContactForm: React.FC = () => {
         setContent({ ...content, contact: formData });
         setStatus('Contact section saved successfully!');
         setTimeout(() => setStatus(''), 3000);
+    };
+
+    const handleReset = () => {
+        if (window.confirm("Are you sure you want to reset the Contact section to its default content? This will update the database.")) {
+            setContent({ ...content, contact: defaultContent.contact });
+            setStatus('Contact section has been reset to default.');
+            setTimeout(() => setStatus(''), 3000);
+        }
     };
 
     return (
@@ -89,6 +102,13 @@ const ContactForm: React.FC = () => {
 
             <div className="flex items-center justify-between mt-8 pt-6 border-t">
                 <button type="submit" className="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-800 transition-colors">Save Changes</button>
+                <button 
+                    type="button" 
+                    onClick={handleReset} 
+                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
+                >
+                    Reset Section
+                </button>
                 {status && <p className="text-green-600 font-semibold">{status}</p>}
             </div>
         </form>
