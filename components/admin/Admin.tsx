@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabaseClient';
@@ -17,9 +18,11 @@ import MediaLibrary from './MediaLibrary';
 import MediaLibraryModal from './MediaLibraryModal';
 import PageStructure from './PageStructure';
 import VideoForm from './forms/VideoForm';
+import ContactSubmissions from './ContactSubmissions';
+import { useContent } from '../../hooks/useContent';
 
 type ActiveView = 
-  | { type: 'general' | 'footer' | 'media' | 'pageStructure' }
+  | { type: 'general' | 'footer' | 'media' | 'pageStructure' | 'submissions' }
   | { type: 'section', id: string };
 
 const componentFormMap: { [key: string]: React.ComponentType<any> } = {
@@ -43,6 +46,8 @@ const Admin: React.FC = () => {
   const [activeView, setActiveView] = useState<ActiveView>({ type: 'pageStructure' });
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [mediaModalCallback, setMediaModalCallback] = useState<(url: string) => void>(() => () => {});
+  // Fix: Call useContent at the top level of the component to follow hook rules.
+  const { content } = useContent();
 
   useEffect(() => {
     const getSession = async () => {
@@ -81,19 +86,27 @@ const Admin: React.FC = () => {
   }
 
   const renderActiveView = () => {
-    const props = { openMediaLibrary };
     switch (activeView.type) {
-      case 'general': return <GeneralForm {...props} />;
+      // Fix: GeneralForm does not accept any props, so remove the spread.
+      case 'general': return <GeneralForm />;
       case 'footer': return <FooterForm />;
       case 'media': return <MediaLibrary isModal={false} />;
       case 'pageStructure': return <PageStructure />;
+      case 'submissions': return <ContactSubmissions />;
       case 'section':
-        const { content } = useContent(); // A bit inefficient but simple
         const section = content.sections.find(s => s.id === activeView.id);
         if (!section) return <div>Section not found</div>;
         const FormComponent = componentFormMap[section.type];
         if (!FormComponent) return <div>No editor for this section type: {section.type}</div>;
-        return <FormComponent {...props} sectionId={section.id} />;
+
+        // Fix: Conditionally build props object to only pass `openMediaLibrary` to components that need it.
+        // This resolves the error and makes the component logic more robust.
+        const formProps: any = { sectionId: section.id };
+        if (['hero', 'about', 'testimonials'].includes(section.type)) {
+          formProps.openMediaLibrary = openMediaLibrary;
+        }
+
+        return <FormComponent {...formProps} />;
       default: return <PageStructure />;
     }
   };
@@ -120,5 +133,4 @@ const Admin: React.FC = () => {
 };
 // Helper hook to avoid prop-drilling within Admin component.
 // Note: This is a simplified hook, and a more complex app might use a different pattern.
-import { useContent } from '../../hooks/useContent';
 export default Admin;

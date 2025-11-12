@@ -12,13 +12,14 @@ import {
   MailIcon,
   VideoCameraIcon,
   MenuAlt2Icon,
-  TemplateIcon
+  TemplateIcon,
+  InboxIcon
 } from '../Icons';
 import { useContent } from '../../hooks/useContent';
 import { SectionType } from '../../types';
 
 type ActiveView = 
-  | { type: 'general' | 'footer' | 'media' | 'pageStructure' }
+  | { type: 'general' | 'footer' | 'media' | 'pageStructure' | 'submissions' }
   | { type: 'section', id: string };
 
 interface AdminSidebarProps {
@@ -47,8 +48,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeView, setActiveView }
 
   const staticNavItems = [
     { id: 'pageStructure', label: 'Page Structure', icon: <TemplateIcon className="h-5 w-5 mr-3" /> },
-    { id: 'general', label: 'Site Settings', icon: <CogIcon className="h-5 w-5 mr-3" /> },
+    { id: 'submissions', label: 'Submissions', icon: <InboxIcon className="h-5 w-5 mr-3" /> },
     { id: 'media', label: 'Media Library', icon: <PhotographIcon className="h-5 w-5 mr-3" /> },
+    { id: 'general', label: 'Site Settings', icon: <CogIcon className="h-5 w-5 mr-3" /> },
   ];
 
   return (
@@ -58,7 +60,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeView, setActiveView }
           {staticNavItems.map(item => (
             <li key={item.id} className="mb-2">
               <button
-                onClick={() => setActiveView({type: item.id as 'pageStructure' | 'general' | 'media' })}
+                onClick={() => setActiveView({type: item.id as 'pageStructure' | 'general' | 'media' | 'submissions' })}
                 className={`w-full text-left px-3 py-2 rounded-md transition-colors flex items-center text-sm font-medium ${
                   activeView.type === item.id 
                   ? 'bg-red-700 text-white' 

@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { MailIcon, PhoneIcon, LocationMarkerIcon, ClockIcon, PaperAirplaneIcon } from './Icons';
 import { ContactContent } from '../types';
+import { supabase } from '../lib/supabaseClient';
 
 interface ContactProps {
   content: ContactContent;
@@ -9,13 +10,43 @@ interface ContactProps {
 }
 
 const Contact: React.FC<ContactProps> = ({ content: contactContent, id }) => {
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    const key = id.replace('contact', '').toLowerCase();
+    setFormData(prev => ({ ...prev, [key]: value }));
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+        setErrorMessage('Please fill out all required fields.');
+        setStatus('error');
+        return;
+    }
+
+    setStatus('loading');
+    setErrorMessage('');
+
+    const { error } = await supabase.from('contact_submissions').insert([
+        { name: formData.name, email: formData.email, subject: formData.subject, message: formData.message }
+    ]);
+
+    if (error) {
+        console.error('Error submitting form:', error);
+        setErrorMessage('There was an error sending your message. Please try again.');
+        setStatus('error');
+    } else {
+        setStatus('success');
+        setFormData({ name: '', email: '', subject: '', message: '' }); // Clear form
+    }
+  };
     
   const Label: React.FC<{ htmlFor: string, children: React.ReactNode }> = ({ htmlFor, children }) => (
     <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-300 mb-1">{children}</label>
-  );
-
-  const Input: React.FC<{ id: string, type: string, placeholder?: string }> = ({ id, type, placeholder }) => (
-    <input type={type} id={id} className="w-full bg-[#2a2a2a] border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-red-500 focus:border-red-500" placeholder={placeholder} />
   );
     
   return (
@@ -78,26 +109,30 @@ const Contact: React.FC<ContactProps> = ({ content: contactContent, id }) => {
             </div>
             <div className="bg-[#2a2a2a] p-8 rounded-lg">
                 <h3 className="text-2xl font-bold mb-6">{contactContent.form.title}</h3>
-                <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-6" onSubmit={handleSubmit}>
                     <div>
                         <Label htmlFor="contactName">{contactContent.form.nameLabel}</Label>
-                        <Input id="contactName" type="text"/>
+                        <input type="text" id="contactName" value={formData.name} onChange={handleInputChange} className="w-full bg-[#2a2a2a] border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-red-500 focus:border-red-500" />
                     </div>
                     <div>
                         <Label htmlFor="contactEmail">{contactContent.form.emailLabel}</Label>
-                        <Input id="contactEmail" type="email"/>
+                        <input type="email" id="contactEmail" value={formData.email} onChange={handleInputChange} className="w-full bg-[#2a2a2a] border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-red-500 focus:border-red-500" />
                     </div>
                     <div>
-                        <Label htmlFor="subject">{contactContent.form.subjectLabel}</Label>
-                        <Input id="subject" type="text" placeholder={contactContent.form.subjectPlaceholder}/>
+                        <Label htmlFor="contactSubject">{contactContent.form.subjectLabel}</Label>
+                        <input type="text" id="contactSubject" value={formData.subject} onChange={handleInputChange} className="w-full bg-[#2a2a2a] border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-red-500 focus:border-red-500" placeholder={contactContent.form.subjectPlaceholder}/>
                     </div>
                     <div>
-                        <Label htmlFor="message">{contactContent.form.messageLabel}</Label>
-                        <textarea id="message" rows={5} className="w-full bg-[#2a2a2a] border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-red-500 focus:border-red-500" placeholder={contactContent.form.messagePlaceholder}></textarea>
+                        <Label htmlFor="contactMessage">{contactContent.form.messageLabel}</Label>
+                        <textarea id="contactMessage" value={formData.message} onChange={handleInputChange} rows={5} className="w-full bg-[#2a2a2a] border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-red-500 focus:border-red-500" placeholder={contactContent.form.messagePlaceholder}></textarea>
+                    </div>
+                     <div className="h-10">
+                        {status === 'success' && <p className="text-green-400 text-center">Message sent successfully! We'll be in touch soon.</p>}
+                        {status === 'error' && <p className="text-red-400 text-center">{errorMessage}</p>}
                     </div>
                     <div>
-                         <button type="submit" className="w-full bg-red-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-800 transition-colors inline-flex items-center justify-center gap-2">
-                            {contactContent.form.buttonText} <PaperAirplaneIcon className="h-5 w-5"/>
+                         <button type="submit" disabled={status === 'loading'} className="w-full bg-red-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-800 transition-colors inline-flex items-center justify-center gap-2 disabled:bg-red-900 disabled:cursor-not-allowed">
+                            {status === 'loading' ? 'Sending...' : contactContent.form.buttonText} <PaperAirplaneIcon className="h-5 w-5"/>
                         </button>
                     </div>
                 </form>
