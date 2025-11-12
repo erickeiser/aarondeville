@@ -70,10 +70,9 @@ const HeroForm: React.FC<HeroFormProps> = ({ openMediaLibrary, sectionId }) => {
                 <Input label="Headline 1" id="headline1" value={formData.headline1} onChange={e => handleInputChange('headline1', e.target.value)} />
                 <Input label="Headline 2 (Colored)" id="headline2" value={formData.headline2} onChange={e => handleInputChange('headline2', e.target.value)} />
                 <Textarea label="Subheading" id="subheading" value={formData.subheading} onChange={e => handleInputChange('subheading', e.target.value)} />
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input label="CTA Button 1 Text" id="cta1" value={formData.ctaButton1} onChange={e => handleInputChange('ctaButton1', e.target.value)} />
                     <Input label="CTA Button 2 Text" id="cta2" value={formData.ctaButton2} onChange={e => handleInputChange('ctaButton2', e.target.value)} />
-                    <Input label="CTA Button 3 Text" id="cta3" value={formData.ctaButton3} onChange={e => handleInputChange('ctaButton3', e.target.value)} />
                 </div>
                 <ImageInput 
                     label="Background Media URL (Image or Video)"

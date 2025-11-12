@@ -12,6 +12,7 @@ const defaultHeader = {
     { text: 'Success Stories', href: '#testimonials' },
     { text: 'Contact', href: '#contact' },
   ],
+  ctaButton: 'Get Started',
 };
 
 const defaultSections: { [key in SectionType]: () => Omit<Section, 'id'> } = {
@@ -21,7 +22,6 @@ const defaultSections: { [key in SectionType]: () => Omit<Section, 'id'> } = {
         subheading: 'Professional personal training with proven results. I help busy professionals achieve their fitness goals through personalized workout plans, nutrition guidance, and unwavering support.',
         ctaButton1: 'Start Your Journey',
         ctaButton2: 'Learn More',
-        ctaButton3: 'Book a Call',
         stats: [
           { value: '200+', label: 'Clients Trained' },
           { value: '5+', label: 'Years Experience' },

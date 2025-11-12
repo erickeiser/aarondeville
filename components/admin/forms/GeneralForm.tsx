@@ -57,6 +57,7 @@ const GeneralForm: React.FC = () => {
             
             <FormCard title="Header Settings" onReset={handleReset}>
                 <Input label="Site Name" id="siteName" value={headerData.siteName} onChange={e => handleInputChange('siteName', e.target.value)} />
+                 <Input label="Header CTA Button Text" id="ctaButton" value={headerData.ctaButton} onChange={e => handleInputChange('ctaButton', e.target.value)} />
                 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Navigation Links</label>
