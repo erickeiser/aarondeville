@@ -1,5 +1,4 @@
 
-
 export interface NavLink {
   text: string;
   href: string;
@@ -8,7 +7,6 @@ export interface NavLink {
 export interface HeaderContent {
   siteName: string;
   navLinks: NavLink[];
-  ctaButton: string;
 }
 
 export interface HeroContent {
@@ -107,6 +105,7 @@ export interface ContactContent {
     messagePlaceholder: string;
     buttonText: string;
   };
+  notificationEmail?: string;
 }
 
 export interface VideoContent {

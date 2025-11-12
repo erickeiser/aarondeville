@@ -1,5 +1,4 @@
 
-
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { HeaderContent } from '../../../types';
@@ -92,8 +91,6 @@ const GeneralForm: React.FC = () => {
                     </div>
                     <button type="button" onClick={addNavLink} className="mt-4 bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 text-sm font-semibold">+ Add Nav Link</button>
                 </div>
-
-                <Input label="Header CTA Button Text" id="headerCta" value={headerData.ctaButton} onChange={e => handleInputChange('ctaButton', e.target.value)} />
             </FormCard>
 
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-6">

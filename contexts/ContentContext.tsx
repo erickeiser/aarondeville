@@ -1,9 +1,6 @@
 
-
-
-
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { SiteContent, Section, SectionType } from '../types';
+import { SiteContent, Section, SectionType, ContactContent } from '../types';
 import { supabase } from '../lib/supabaseClient';
 
 const defaultHeader = {
@@ -15,7 +12,6 @@ const defaultHeader = {
     { text: 'Success Stories', href: '#testimonials' },
     { text: 'Contact', href: '#contact' },
   ],
-  ctaButton: 'Get Started',
 };
 
 const defaultSections: { [key in SectionType]: () => Omit<Section, 'id'> } = {
@@ -109,6 +105,7 @@ const defaultSections: { [key in SectionType]: () => Omit<Section, 'id'> } = {
           messagePlaceholder: 'Tell me about your fitness goals, questions, or how I can help you...',
           buttonText: 'Send Message',
         },
+        notificationEmail: 'changeme@example.com',
     }}),
     video: () => ({ type: 'video', content: {
         headline: 'Featured Video',
@@ -181,6 +178,7 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       if (data && data.content) {
         const fetchedContent = data.content as SiteContent;
+        // Fix: Added data integrity check for navLinks
         if (!fetchedContent.header || !Array.isArray(fetchedContent.header.navLinks)) {
             fetchedContent.header = { ...fetchedContent.header, navLinks: defaultContent.header.navLinks };
         }

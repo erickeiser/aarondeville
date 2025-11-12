@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useContent } from '../hooks/useContent';
 import { UserIcon, MenuIcon, XIcon } from './Icons';
@@ -27,11 +28,6 @@ const Header: React.FC = () => {
             </a>
           ))}
         </nav>
-        <div className="hidden md:flex items-center gap-4">
-          <a href="#contact" className="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-800 transition-colors">
-            {headerContent.ctaButton}
-          </a>
-        </div>
         <div className="md:hidden">
           <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <XIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
@@ -39,16 +35,13 @@ const Header: React.FC = () => {
         </div>
       </div>
       {isMenuOpen && (
-        <div className="md:hidden bg-[#1f1f1f] pb-4">
+        <div className="md:hidden bg-[#1f1f1f] p-4">
           <nav className="flex flex-col items-center space-y-4">
             {navLinks.map((link, index) => (
-              <a key={index} href={link.href} onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white transition-colors">
+              <a key={index} href={link.href} onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white transition-colors py-2">
                 {link.text}
               </a>
             ))}
-            <a href="#contact" onClick={() => setIsMenuOpen(false)} className="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-800 transition-colors">
-              {headerContent.ctaButton}
-            </a>
           </nav>
         </div>
       )}
