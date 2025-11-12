@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useContent } from '../hooks/useContent';
 import { UserIcon, MailIcon, PhoneIcon } from './Icons';
@@ -27,10 +28,9 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="font-semibold text-lg mb-4">{footerContent.quickLinks.title}</h4>
             <ul className="space-y-2">
-              <li><a href="#home" className="text-gray-400 hover:text-white">{header.navLinks.home}</a></li>
-              <li><a href="#about" className="text-gray-400 hover:text-white">{header.navLinks.about}</a></li>
-              <li><a href="#services" className="text-gray-400 hover:text-white">{header.navLinks.services}</a></li>
-              <li><a href="#testimonials" className="text-gray-400 hover:text-white">{header.navLinks.successStories}</a></li>
+              {header.navLinks.map(link => (
+                <li key={link.href}><a href={link.href} className="text-gray-400 hover:text-white">{link.text}</a></li>
+              ))}
               <li><a href="#intake-form" className="text-gray-400 hover:text-white">{footerContent.quickLinks.getStarted}</a></li>
               <li><a href="#/admin" className="text-red-600 hover:text-red-500 font-semibold text-sm mt-2 inline-block">{footerContent.quickLinks.admin}</a></li>
             </ul>

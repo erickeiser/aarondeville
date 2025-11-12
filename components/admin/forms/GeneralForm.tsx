@@ -29,18 +29,42 @@ const GeneralForm: React.FC<GeneralFormProps> = ({ openMediaLibrary }) => {
         }));
     };
     
-    const handleNavLinksChange = (key: string, value: string) => {
+    const handleNavLinksChange = (index: number, key: 'text' | 'href', value: string) => {
+        setFormData(prev => {
+            const newNavLinks = [...prev.header.navLinks];
+            newNavLinks[index] = { ...newNavLinks[index], [key]: value };
+            return {
+                ...prev,
+                header: {
+                    ...prev.header,
+                    navLinks: newNavLinks
+                }
+            };
+        });
+    };
+
+    const addNavLink = () => {
         setFormData(prev => ({
             ...prev,
             header: {
                 ...prev.header,
-                navLinks: {
-                    ...prev.header.navLinks,
-                    [key]: value
-                }
+                navLinks: [...prev.header.navLinks, { text: 'New Link', href: '#' }]
             }
         }));
     };
+
+    const removeNavLink = (index: number) => {
+        if (window.confirm('Are you sure you want to remove this navigation link?')) {
+            setFormData(prev => ({
+                ...prev,
+                header: {
+                    ...prev.header,
+                    navLinks: prev.header.navLinks.filter((_, i) => i !== index)
+                }
+            }));
+        }
+    };
+
 
     const handleGenerateStoryImage = () => {
         const timestamp = new Date().getTime(); // To avoid cached images
@@ -75,13 +99,35 @@ const GeneralForm: React.FC<GeneralFormProps> = ({ openMediaLibrary }) => {
             
             <FormCard title="Header Settings" onReset={() => handleResetSection('header', 'Header')}>
                 <Input label="Site Name" id="siteName" value={formData.header.siteName} onChange={e => handleInputChange('header', 'siteName', e.target.value)} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input label="Nav Link: Home" id="navHome" value={formData.header.navLinks.home} onChange={e => handleNavLinksChange('home', e.target.value)} />
-                    <Input label="Nav Link: About" id="navAbout" value={formData.header.navLinks.about} onChange={e => handleNavLinksChange('about', e.target.value)} />
-                    <Input label="Nav Link: Services" id="navServices" value={formData.header.navLinks.services} onChange={e => handleNavLinksChange('services', e.target.value)} />
-                    <Input label="Nav Link: Success Stories" id="navSuccess" value={formData.header.navLinks.successStories} onChange={e => handleNavLinksChange('successStories', e.target.value)} />
-                    <Input label="Nav Link: Contact" id="navContact" value={formData.header.navLinks.contact} onChange={e => handleNavLinksChange('contact', e.target.value)} />
+                
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Navigation Links</label>
+                    <div className="space-y-3">
+                        {formData.header.navLinks.map((link, index) => (
+                            <div key={index} className="p-3 bg-gray-50 border rounded-md grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                                <Input 
+                                    label={`Link ${index + 1} Text`} 
+                                    id={`nav-text-${index}`} 
+                                    value={link.text} 
+                                    onChange={e => handleNavLinksChange(index, 'text', e.target.value)} 
+                                />
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-grow">
+                                    <Input 
+                                        label="URL/Anchor" 
+                                        id={`nav-href-${index}`} 
+                                        value={link.href} 
+                                        onChange={e => handleNavLinksChange(index, 'href', e.target.value)} 
+                                    />
+                                   </div>
+                                    <button type="button" onClick={() => removeNavLink(index)} className="text-red-600 hover:text-red-800 text-sm font-semibold pb-1 h-fit">Remove</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <button type="button" onClick={addNavLink} className="mt-4 bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 text-sm font-semibold">+ Add Nav Link</button>
                 </div>
+
                 <Input label="Header CTA Button Text" id="headerCta" value={formData.header.ctaButton} onChange={e => handleInputChange('header', 'ctaButton', e.target.value)} />
             </FormCard>
 

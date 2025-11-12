@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useContent } from '../hooks/useContent';
 import { UserIcon, MenuIcon, XIcon } from './Icons';
@@ -6,14 +7,6 @@ const Header: React.FC = () => {
   const { content } = useContent();
   const { header: headerContent } = content;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const navLinks = [
-    { href: '#home', text: headerContent.navLinks.home },
-    { href: '#about', text: headerContent.navLinks.about },
-    { href: '#services', text: headerContent.navLinks.services },
-    { href: '#testimonials', text: headerContent.navLinks.successStories },
-    { href: '#contact', text: headerContent.navLinks.contact },
-  ];
 
   return (
     <header className="bg-[#121212]/80 backdrop-blur-sm sticky top-0 z-50">
@@ -25,7 +18,7 @@ const Header: React.FC = () => {
           <span className="text-xl font-bold">{headerContent.siteName}</span>
         </a>
         <nav className="hidden md:flex items-center space-x-6">
-          {navLinks.map((link) => (
+          {headerContent.navLinks.map((link) => (
             <a key={link.href} href={link.href} className="text-gray-300 hover:text-white transition-colors">
               {link.text}
             </a>
@@ -45,7 +38,7 @@ const Header: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-[#1f1f1f] pb-4">
           <nav className="flex flex-col items-center space-y-4">
-            {navLinks.map((link) => (
+            {headerContent.navLinks.map((link) => (
               <a key={link.href} href={link.href} onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white transition-colors">
                 {link.text}
               </a>

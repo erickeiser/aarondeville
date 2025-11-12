@@ -1,4 +1,3 @@
-
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea, ImageInput, FormCard } from './FormElements';
@@ -61,7 +60,7 @@ const HeroForm: React.FC<HeroFormProps> = ({ openMediaLibrary }) => {
                     <Input label="CTA Button 2 Text" id="cta2" value={formData.ctaButton2} onChange={e => handleInputChange('ctaButton2', e.target.value)} />
                 </div>
                 <ImageInput 
-                    label="Image URL"
+                    label="Background Media URL (Image or Video)"
                     id="imageUrl"
                     value={formData.imageUrl}
                     onChange={e => handleInputChange('imageUrl', e.target.value)}

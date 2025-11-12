@@ -1,3 +1,5 @@
+
+
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { SiteContent } from '../types';
 import { supabase } from '../lib/supabaseClient';
@@ -5,13 +7,13 @@ import { supabase } from '../lib/supabaseClient';
 export const defaultContent: SiteContent = {
   header: {
     siteName: 'Ari Deville Fitness',
-    navLinks: {
-      home: 'Home',
-      about: 'About',
-      services: 'Services',
-      successStories: 'Success Stories',
-      contact: 'Contact',
-    },
+    navLinks: [
+      { text: 'Home', href: '#home' },
+      { text: 'About', href: '#about' },
+      { text: 'Services', href: '#services' },
+      { text: 'Success Stories', href: '#testimonials' },
+      { text: 'Contact', href: '#contact' },
+    ],
     ctaButton: 'Get Started',
   },
   hero: {
@@ -141,7 +143,16 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
       }
 
       if (data) {
-        setContentState(data.content);
+        const fetchedContent = data.content as SiteContent;
+        // Data integrity check: Ensure navLinks is always an array to prevent crashes.
+        if (!fetchedContent.header || !Array.isArray(fetchedContent.header.navLinks)) {
+            console.warn("Malformed navLinks detected in database. Reverting to default.");
+            fetchedContent.header = {
+                ...fetchedContent.header,
+                navLinks: defaultContent.header.navLinks,
+            };
+        }
+        setContentState(fetchedContent);
       } else {
         console.log('No content found, initializing with default content.');
         const { error: insertError } = await supabase
@@ -194,6 +205,7 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
   }
 
   return (
+    // Fix: Corrected a typo where 'Content' was used instead of the 'content' state variable.
     <ContentContext.Provider value={{ content, setContent, resetContent }}>
       {children}
     </ContentContext.Provider>

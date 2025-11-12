@@ -6,6 +6,8 @@ const Hero: React.FC = () => {
   const { content } = useContent();
   const { hero: heroContent } = content;
 
+  const isVideo = heroContent.imageUrl.match(/\.(mp4|webm|mov)$/i);
+
   return (
     <section id="home" className="py-20 md:py-32 bg-gradient-to-b from-[#1f1f1f] to-[#121212]">
       <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
@@ -40,7 +42,19 @@ const Hero: React.FC = () => {
         </div>
         <div className="flex justify-center">
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-orange-500/10 w-full max-w-sm">
-            <img src={heroContent.imageUrl} alt="Fit personal trainer" className="w-full h-auto object-cover" />
+            {isVideo ? (
+              <video 
+                src={heroContent.imageUrl} 
+                className="w-full h-auto object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                key={heroContent.imageUrl}
+              />
+            ) : (
+              <img src={heroContent.imageUrl} alt="Fit personal trainer" className="w-full h-auto object-cover" />
+            )}
           </div>
         </div>
       </div>

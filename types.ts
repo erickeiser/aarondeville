@@ -1,13 +1,13 @@
+
+export interface NavLink {
+  text: string;
+  href: string;
+}
+
 export interface SiteContent {
   header: {
     siteName: string;
-    navLinks: {
-      home: string;
-      about: string;
-      services: string;
-      successStories: string;
-      contact: string;
-    };
+    navLinks: NavLink[];
     ctaButton: string;
   };
   hero: {

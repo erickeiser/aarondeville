@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { FileObject } from '@supabase/storage-js';
@@ -54,7 +53,7 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ isModal, onSelect }) => {
             
             if (uploadError) {
                 console.error('Error uploading file:', uploadError);
-                setError(`Upload failed: ${uploadError.message}`);
+                setError(`Upload failed: ${uploadError.message}. Make sure the bucket's max file size is large enough.`);
             }
         }
         
@@ -115,7 +114,7 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ isModal, onSelect }) => {
             {!isModal && (
                 <div className="pb-4 border-b mb-4">
                      <h2 className="text-2xl font-bold text-gray-800">Media Library</h2>
-                     <p className="text-sm text-gray-500 mt-1">Upload and manage images for your website.</p>
+                     <p className="text-sm text-gray-500 mt-1">Upload and manage images and videos for your website.</p>
                 </div>
             )}
            
@@ -132,7 +131,7 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ isModal, onSelect }) => {
                 <input
                     type="file"
                     multiple
-                    accept="image/*"
+                    accept="image/*,video/*"
                     onChange={(e) => handleFileUpload(e.target.files)}
                     id="file-upload"
                     className="hidden"
@@ -151,9 +150,14 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ isModal, onSelect }) => {
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {files.map(file => {
                             const publicUrl = getPublicUrl(file.name);
+                            const isVideo = file.metadata?.mimetype?.startsWith('video/');
                             return (
-                                <div key={file.id} className="group relative border rounded-lg overflow-hidden aspect-square">
-                                    <img src={publicUrl} alt={file.name} className="w-full h-full object-cover"/>
+                                <div key={file.id} className="group relative border rounded-lg overflow-hidden aspect-square bg-gray-100">
+                                    {isVideo ? (
+                                        <video src={publicUrl} className="w-full h-full object-cover" muted loop playsInline />
+                                    ) : (
+                                        <img src={publicUrl} alt={file.name} className="w-full h-full object-cover"/>
+                                    )}
                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-between">
                                         <p className="text-white text-xs break-words">{file.name}</p>
                                         <div className="flex flex-col gap-1">
