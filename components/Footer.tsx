@@ -74,11 +74,11 @@ const Footer: React.FC = () => {
             {footerContent.copyright}
           </div>
       </div>
-       <button onClick={() => window.location.href='#contact'} className="fixed bottom-6 right-6 bg-orange-500 hover:bg-orange-600 text-white h-12 w-12 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 z-40" aria-label="Contact">
+       <a href='#contact' className="fixed bottom-6 right-6 bg-orange-500 hover:bg-orange-600 text-white h-12 w-12 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 z-40" aria-label="Contact">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
-        </button>
+        </a>
     </footer>
   );
 };
