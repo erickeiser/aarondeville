@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { UsersIcon, StarIcon, BadgeCheckIcon } from './Icons';
 import { HeroContent } from '../types';
@@ -29,6 +30,9 @@ const Hero: React.FC<HeroProps> = ({ content: heroContent, id }) => {
             </a>
             <a href="#about" className="bg-transparent border-2 border-gray-600 text-gray-300 px-8 py-3 rounded-md font-semibold hover:bg-gray-800 hover:border-gray-800 transition-colors flex items-center justify-center">
               {heroContent.ctaButton2}
+            </a>
+            <a href="#contact" className="bg-red-700 text-white px-8 py-3 rounded-md font-semibold hover:bg-red-800 transition-colors flex items-center justify-center">
+              {heroContent.ctaButton3}
             </a>
           </div>
           <div className="mt-16 flex justify-center md:justify-start space-x-8 sm:space-x-12">

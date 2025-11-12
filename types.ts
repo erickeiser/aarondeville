@@ -1,4 +1,5 @@
 
+
 export interface NavLink {
   text: string;
   href: string;
@@ -16,6 +17,7 @@ export interface HeroContent {
   subheading: string;
   ctaButton1: string;
   ctaButton2: string;
+  ctaButton3: string;
   stats: { value: string; label: string }[];
   imageUrl: string;
 }
