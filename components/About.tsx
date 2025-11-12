@@ -1,6 +1,7 @@
+
 import React from 'react';
-import { useContent } from '../hooks/useContent';
 import { HeartIcon, TargetIcon, ZapIcon, ShieldCheckIcon } from './Icons';
+import { AboutContent } from '../types';
 
 const iconMap: { [key: string]: React.ReactNode } = {
   HeartIcon: <HeartIcon className="h-6 w-6 text-red-500" />,
@@ -9,12 +10,14 @@ const iconMap: { [key: string]: React.ReactNode } = {
   ShieldCheckIcon: <ShieldCheckIcon className="h-6 w-6 text-red-500" />,
 };
 
-const About: React.FC = () => {
-  const { content } = useContent();
-  const { about: aboutContent } = content;
+interface AboutProps {
+  content: AboutContent;
+  id: string;
+}
 
+const About: React.FC<AboutProps> = ({ content: aboutContent, id }) => {
   return (
-    <section id="about" className="py-20 md:py-28 bg-[#1f1f1f]">
+    <section id={id} className="py-20 md:py-28 bg-[#1f1f1f]">
       <div className="container mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>

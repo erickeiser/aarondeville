@@ -1,6 +1,7 @@
+
 import React from 'react';
-import { useContent } from '../hooks/useContent';
 import { CheckIcon } from './Icons';
+import { ServicesContent } from '../types';
 
 const ServiceCard: React.FC<{ plan: any }> = ({ plan }) => {
   const isPopular = plan.popular;
@@ -29,12 +30,14 @@ const ServiceCard: React.FC<{ plan: any }> = ({ plan }) => {
   );
 };
 
-const Services: React.FC = () => {
-  const { content } = useContent();
-  const { services: servicesContent } = content;
+interface ServicesProps {
+  content: ServicesContent;
+  id: string;
+}
 
+const Services: React.FC<ServicesProps> = ({ content: servicesContent, id }) => {
   return (
-    <section id="services" className="py-20 md:py-28 bg-gray-200">
+    <section id={id} className="py-20 md:py-28 bg-gray-200">
       <div className="container mx-auto px-6 text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-800">{servicesContent.headline}</h2>
         <p className="mt-4 text-gray-600 max-w-2xl mx-auto">

@@ -1,10 +1,14 @@
-import React from 'react';
-import { useContent } from '../hooks/useContent';
-import { MailIcon, PhoneIcon, LocationMarkerIcon, ClockIcon, PaperAirplaneIcon } from './Icons';
 
-const Contact: React.FC = () => {
-  const { content } = useContent();
-  const { contact: contactContent } = content;
+import React from 'react';
+import { MailIcon, PhoneIcon, LocationMarkerIcon, ClockIcon, PaperAirplaneIcon } from './Icons';
+import { ContactContent } from '../types';
+
+interface ContactProps {
+  content: ContactContent;
+  id: string;
+}
+
+const Contact: React.FC<ContactProps> = ({ content: contactContent, id }) => {
     
   const Label: React.FC<{ htmlFor: string, children: React.ReactNode }> = ({ htmlFor, children }) => (
     <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-300 mb-1">{children}</label>
@@ -15,7 +19,7 @@ const Contact: React.FC = () => {
   );
     
   return (
-    <section id="contact" className="py-20 md:py-28 bg-[#1f1f1f]">
+    <section id={id} className="py-20 md:py-28 bg-[#1f1f1f]">
       <div className="container mx-auto px-6">
         <div className="text-center">
             <h2 className="text-3xl md:text-4xl font-bold">{contactContent.headline}</h2>

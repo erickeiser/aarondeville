@@ -1,36 +1,43 @@
 
+
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea, ImageInput, FormCard } from './FormElements';
 import { defaultContent } from '../../../contexts/ContentContext';
+import { AboutContent } from '../../../types';
 
 interface AboutFormProps {
     openMediaLibrary: (onSelect: (url: string) => void) => void;
+    sectionId: string;
 }
 
-const AboutForm: React.FC<AboutFormProps> = ({ openMediaLibrary }) => {
-    const { content, setContent } = useContent();
-    const [formData, setFormData] = useState(content.about);
+const AboutForm: React.FC<AboutFormProps> = ({ openMediaLibrary, sectionId }) => {
+    const { content, updateSectionContent } = useContent();
+    const sectionData = content.sections.find(s => s.id === sectionId)?.content as AboutContent;
+    
+    const [formData, setFormData] = useState<AboutContent | undefined>(sectionData);
     const [status, setStatus] = useState('');
 
     useEffect(() => {
-        setFormData(content.about);
-    }, [content.about]);
+        setFormData(content.sections.find(s => s.id === sectionId)?.content as AboutContent);
+    }, [content, sectionId]);
+
+    if (!formData) return <div>Loading...</div>;
 
     const handleInputChange = (key: keyof typeof formData, value: string) => {
-        setFormData(prev => ({ ...prev, [key]: value }));
+        setFormData(prev => prev ? ({ ...prev, [key]: value }) : undefined);
     };
 
     const handleCertificationChange = (index: number, key: 'title' | 'issuer', value: string) => {
         const newCerts = [...formData.certifications];
         newCerts[index] = { ...newCerts[index], [key]: value };
-        setFormData(prev => ({...prev, certifications: newCerts}));
+        setFormData(prev => prev ? ({...prev, certifications: newCerts}) : undefined);
     };
     
     const handleValueChange = (index: number, key: 'title' | 'description', value: string) => {
         const newValues = [...formData.values];
         newValues[index] = { ...newValues[index], [key]: value };
-        setFormData(prev => ({...prev, values: newValues}));
+        setFormData(prev => prev ? ({...prev, values: newValues}) : undefined);
     };
     
     const handleGenerateImage = () => {
@@ -41,16 +48,21 @@ const AboutForm: React.FC<AboutFormProps> = ({ openMediaLibrary }) => {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        setContent({ ...content, about: formData });
-        setStatus('About section saved successfully!');
-        setTimeout(() => setStatus(''), 3000);
+        if (formData) {
+            updateSectionContent(sectionId, formData);
+            setStatus('About section saved successfully!');
+            setTimeout(() => setStatus(''), 3000);
+        }
     };
     
     const handleReset = () => {
-        if (window.confirm("Are you sure you want to reset the About section to its default content? This will update the database.")) {
-            setContent({ ...content, about: defaultContent.about });
-            setStatus('About section has been reset to default.');
-            setTimeout(() => setStatus(''), 3000);
+        if (window.confirm("Are you sure you want to reset this section to its default content?")) {
+            const defaultSectionContent = defaultContent.sections.find(s => s.type === 'about')?.content;
+            if (defaultSectionContent) {
+                updateSectionContent(sectionId, defaultSectionContent);
+                setStatus('About section has been reset.');
+                setTimeout(() => setStatus(''), 3000);
+            }
         }
     };
 

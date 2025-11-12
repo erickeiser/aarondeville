@@ -15,11 +15,32 @@ import ContactForm from './forms/ContactForm';
 import FooterForm from './forms/FooterForm';
 import MediaLibrary from './MediaLibrary';
 import MediaLibraryModal from './MediaLibraryModal';
+import PageStructure from './PageStructure';
+import VideoForm from './forms/VideoForm';
+
+type ActiveView = 
+  | { type: 'general' | 'footer' | 'media' | 'pageStructure' }
+  | { type: 'section', id: string };
+
+const componentFormMap: { [key: string]: React.ComponentType<any> } = {
+  hero: HeroForm,
+  about: AboutForm,
+  services: ServicesForm,
+  testimonials: TestimonialsForm,
+  contact: ContactForm,
+  video: VideoForm,
+  // Sections without dedicated forms can be handled or ignored
+  // Fix: Removed {...props} spread to prevent passing invalid attributes to the div element.
+  consultation: (props: any) => <div className="bg-white p-6 rounded-lg shadow-sm border">This section is editable under "Site Settings".</div>,
+  writeSuccessStory: (props: any) => <div className="bg-white p-6 rounded-lg shadow-sm border">This section is editable under "Site Settings".</div>,
+  intakeForm: (props: any) => <div className="bg-white p-6 rounded-lg shadow-sm border">This section is editable under "Site Settings".</div>,
+};
+
 
 const Admin: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState('general');
+  const [activeView, setActiveView] = useState<ActiveView>({ type: 'pageStructure' });
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [mediaModalCallback, setMediaModalCallback] = useState<(url: string) => void>(() => () => {});
 
@@ -61,19 +82,19 @@ const Admin: React.FC = () => {
 
   const renderActiveView = () => {
     const props = { openMediaLibrary };
-    switch (activeView) {
+    switch (activeView.type) {
       case 'general': return <GeneralForm {...props} />;
-      case 'hero': return <HeroForm {...props} />;
-      case 'about': return <AboutForm {...props} />;
-      // Fix: Removed props from ServicesForm as it does not accept any, which was causing a type error.
-      case 'services': return <ServicesForm />;
-      case 'testimonials': return <TestimonialsForm {...props} />;
-      // Fix: Removed props from ContactForm as it does not accept any.
-      case 'contact': return <ContactForm />;
-      // Fix: Removed props from FooterForm as it does not accept any.
       case 'footer': return <FooterForm />;
       case 'media': return <MediaLibrary isModal={false} />;
-      default: return <GeneralForm {...props} />;
+      case 'pageStructure': return <PageStructure />;
+      case 'section':
+        const { content } = useContent(); // A bit inefficient but simple
+        const section = content.sections.find(s => s.id === activeView.id);
+        if (!section) return <div>Section not found</div>;
+        const FormComponent = componentFormMap[section.type];
+        if (!FormComponent) return <div>No editor for this section type: {section.type}</div>;
+        return <FormComponent {...props} sectionId={section.id} />;
+      default: return <PageStructure />;
     }
   };
 
@@ -97,5 +118,7 @@ const Admin: React.FC = () => {
     </div>
   );
 };
-
+// Helper hook to avoid prop-drilling within Admin component.
+// Note: This is a simplified hook, and a more complex app might use a different pattern.
+import { useContent } from '../../hooks/useContent';
 export default Admin;

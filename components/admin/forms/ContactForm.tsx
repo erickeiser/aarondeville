@@ -1,20 +1,31 @@
 
+
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea, FormCard } from './FormElements';
 import { defaultContent } from '../../../contexts/ContentContext';
+import { ContactContent } from '../../../types';
 
-const ContactForm: React.FC = () => {
-    const { content, setContent } = useContent();
-    const [formData, setFormData] = useState(content.contact);
+interface ContactFormProps {
+    sectionId: string;
+}
+
+const ContactForm: React.FC<ContactFormProps> = ({ sectionId }) => {
+    const { content, updateSectionContent } = useContent();
+    const sectionData = content.sections.find(s => s.id === sectionId)?.content as ContactContent;
+    
+    const [formData, setFormData] = useState<ContactContent | undefined>(sectionData);
     const [status, setStatus] = useState('');
 
     useEffect(() => {
-        setFormData(content.contact);
-    }, [content.contact]);
+        setFormData(content.sections.find(s => s.id === sectionId)?.content as ContactContent);
+    }, [content, sectionId]);
+    
+    if (!formData) return <div>Loading...</div>;
 
     const handleInputChange = (section: keyof typeof formData, key: any, value: any, subKey?: any) => {
         setFormData(prev => {
+            if (!prev) return undefined;
             const sectionData = prev[section];
             if (typeof sectionData !== 'object' || sectionData === null) {
                 return prev;
@@ -34,16 +45,21 @@ const ContactForm: React.FC = () => {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        setContent({ ...content, contact: formData });
-        setStatus('Contact section saved successfully!');
-        setTimeout(() => setStatus(''), 3000);
+        if (formData) {
+            updateSectionContent(sectionId, formData);
+            setStatus('Contact section saved successfully!');
+            setTimeout(() => setStatus(''), 3000);
+        }
     };
 
     const handleReset = () => {
-        if (window.confirm("Are you sure you want to reset the Contact section to its default content? This will update the database.")) {
-            setContent({ ...content, contact: defaultContent.contact });
-            setStatus('Contact section has been reset to default.');
-            setTimeout(() => setStatus(''), 3000);
+        if (window.confirm("Are you sure you want to reset this section to its default content?")) {
+            const defaultSectionContent = defaultContent.sections.find(s => s.type === 'contact')?.content;
+            if (defaultSectionContent) {
+                updateSectionContent(sectionId, defaultSectionContent);
+                setStatus('Contact section has been reset.');
+                setTimeout(() => setStatus(''), 3000);
+            }
         }
     };
 
@@ -52,7 +68,7 @@ const ContactForm: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-800">Edit Contact Section</h2>
 
             <FormCard title="Main Titles & Subheadings" onReset={handleReset}>
-                <Input label="Headline" id="headline" value={formData.headline} onChange={e => setFormData(p => ({...p, headline: e.target.value}))} />
+                <Input label="Headline" id="headline" value={formData.headline} onChange={e => setFormData(p => p ? ({...p, headline: e.target.value}) : undefined)} />
                 <Input label="Subheading Line 1" id="sub1" value={formData.subheading.line1} onChange={e => handleInputChange('subheading', 'line1', e.target.value)} />
                 <Input label="Subheading Line 2" id="sub2" value={formData.subheading.line2} onChange={e => handleInputChange('subheading', 'line2', e.target.value)} />
             </FormCard>

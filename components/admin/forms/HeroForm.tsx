@@ -1,49 +1,63 @@
+
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea, ImageInput, FormCard } from './FormElements';
 import { defaultContent } from '../../../contexts/ContentContext';
+import { HeroContent } from '../../../types';
 
 interface HeroFormProps {
     openMediaLibrary: (onSelect: (url: string) => void) => void;
+    sectionId: string;
 }
 
-const HeroForm: React.FC<HeroFormProps> = ({ openMediaLibrary }) => {
-    const { content, setContent } = useContent();
-    const [formData, setFormData] = useState(content.hero);
+const HeroForm: React.FC<HeroFormProps> = ({ openMediaLibrary, sectionId }) => {
+    const { content, updateSectionContent } = useContent();
+    const sectionData = content.sections.find(s => s.id === sectionId)?.content as HeroContent;
+    
+    const [formData, setFormData] = useState<HeroContent | undefined>(sectionData);
     const [status, setStatus] = useState('');
 
     useEffect(() => {
-        setFormData(content.hero);
-    }, [content.hero]);
+        setFormData(content.sections.find(s => s.id === sectionId)?.content as HeroContent);
+    }, [content, sectionId]);
+
+    if (!formData) {
+        return <div>Loading...</div>;
+    }
 
     const handleInputChange = (key: keyof typeof formData, value: string) => {
-        setFormData(prev => ({ ...prev, [key]: value }));
+        setFormData(prev => prev ? { ...prev, [key]: value } : undefined);
     };
 
     const handleStatChange = (index: number, key: 'value' | 'label', value: string) => {
-        const newStats = [...formData.stats];
+        const newStats = [...(formData.stats || [])];
         newStats[index] = { ...newStats[index], [key]: value };
-        setFormData(prev => ({...prev, stats: newStats}));
+        setFormData(prev => prev ? {...prev, stats: newStats} : undefined);
     };
     
     const handleGenerateImage = () => {
-        const timestamp = new Date().getTime(); // To avoid cached images
+        const timestamp = new Date().getTime();
         const newUrl = `https://source.unsplash.com/random/800x1000?fitness,workout,athlete&t=${timestamp}`;
         handleInputChange('imageUrl', newUrl);
     };
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        setContent({ ...content, hero: formData });
-        setStatus('Hero section saved successfully!');
-        setTimeout(() => setStatus(''), 3000);
+        if (formData) {
+            updateSectionContent(sectionId, formData);
+            setStatus('Hero section saved successfully!');
+            setTimeout(() => setStatus(''), 3000);
+        }
     };
 
     const handleReset = () => {
-        if (window.confirm("Are you sure you want to reset the Hero section to its default content? This will update the database.")) {
-            setContent({ ...content, hero: defaultContent.hero });
-            setStatus('Hero section has been reset to default.');
-            setTimeout(() => setStatus(''), 3000);
+        if (window.confirm("Are you sure you want to reset this section to its default content?")) {
+            const defaultSectionContent = defaultContent.sections.find(s => s.type === 'hero')?.content;
+            if (defaultSectionContent) {
+                updateSectionContent(sectionId, defaultSectionContent);
+                setStatus('Hero section has been reset.');
+                setTimeout(() => setStatus(''), 3000);
+            }
         }
     };
 

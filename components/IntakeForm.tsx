@@ -1,12 +1,15 @@
-import React from 'react';
-import { useContent } from '../hooks/useContent';
-import { UserCircleIcon, TargetIcon, CalendarIcon, PaperAirplaneIcon } from './Icons';
 
-const IntakeForm: React.FC = () => {
-  const { content } = useContent();
-  const { intakeForm: formContent } = content;
+import React from 'react';
+import { UserCircleIcon, TargetIcon, CalendarIcon, PaperAirplaneIcon } from './Icons';
+import { IntakeFormContent } from '../types';
+
+interface IntakeFormProps {
+  content: IntakeFormContent;
+  id: string;
+}
+
+const IntakeForm: React.FC<IntakeFormProps> = ({ content: formContent, id }) => {
     
-  // Fix: Made the `htmlFor` prop optional to allow for labels not associated with a specific input.
   const Label: React.FC<{ htmlFor?: string, children: React.ReactNode, className?: string }> = ({ htmlFor, children, className }) => (
     <label htmlFor={htmlFor} className={`block text-sm font-medium text-gray-700 mb-1 ${className}`}>
         {children}
@@ -34,7 +37,7 @@ const IntakeForm: React.FC = () => {
   );
 
   return (
-    <section id="intake-form" className="py-20 md:py-28 bg-gray-200">
+    <section id={id} className="py-20 md:py-28 bg-gray-200">
       <div className="container mx-auto px-6 text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-800">{formContent.headline}</h2>
         <p className="mt-4 text-gray-600 max-w-2xl mx-auto">

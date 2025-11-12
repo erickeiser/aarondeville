@@ -1,13 +1,16 @@
+
 import React from 'react';
-import { useContent } from '../hooks/useContent';
 import { CheckCircleIcon } from './Icons';
+import { WriteSuccessStoryContent } from '../types';
 
-const WriteSuccessStory: React.FC = () => {
-  const { content } = useContent();
-  const { writeSuccessStory: storyContent } = content;
+interface WriteSuccessStoryProps {
+  content: WriteSuccessStoryContent;
+  id: string;
+}
 
+const WriteSuccessStory: React.FC<WriteSuccessStoryProps> = ({ content: storyContent, id }) => {
   return (
-    <section className="pb-20 md:pb-28 bg-[#121212]">
+    <section id={id} className="pb-20 md:pb-28 bg-[#121212]">
       <div className="container mx-auto px-6">
         <div className="bg-gradient-to-r from-[#1f1f1f] to-[#2a2a2a] rounded-2xl p-8 md:p-16">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -25,7 +28,7 @@ const WriteSuccessStory: React.FC = () => {
                 ))}
               </ul>
               <div className="mt-10">
-                <a href="#intake-form" className="bg-red-700 text-white px-8 py-3 rounded-md font-semibold hover:bg-red-800 transition-colors">
+                <a href="#contact" className="bg-red-700 text-white px-8 py-3 rounded-md font-semibold hover:bg-red-800 transition-colors">
                   {storyContent.buttonText}
                 </a>
               </div>

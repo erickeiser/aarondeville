@@ -1,61 +1,70 @@
 
+
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea, FormCard } from './FormElements';
 import { defaultContent } from '../../../contexts/ContentContext';
+import { ServicesContent } from '../../../types';
 
-type Plan = {
-    popular: boolean;
-    title: string;
-    price: string;
-    description: string;
-    features: string[];
+type Plan = ServicesContent['plans'][0];
+
+interface ServicesFormProps {
+    sectionId: string;
 }
 
-const ServicesForm: React.FC = () => {
-    const { content, setContent } = useContent();
-    const [formData, setFormData] = useState(content.services);
+const ServicesForm: React.FC<ServicesFormProps> = ({ sectionId }) => {
+    const { content, updateSectionContent } = useContent();
+    const sectionData = content.sections.find(s => s.id === sectionId)?.content as ServicesContent;
+    
+    const [formData, setFormData] = useState<ServicesContent | undefined>(sectionData);
     const [status, setStatus] = useState('');
 
     useEffect(() => {
-        setFormData(content.services);
-    }, [content.services]);
+        setFormData(content.sections.find(s => s.id === sectionId)?.content as ServicesContent);
+    }, [content, sectionId]);
+
+    if (!formData) return <div>Loading...</div>;
 
     const handleInputChange = (key: 'headline' | 'subheading', value: string) => {
-        setFormData(prev => ({ ...prev, [key]: value }));
+        setFormData(prev => prev ? ({ ...prev, [key]: value }) : undefined);
     };
     
     const handlePlanChange = (index: number, key: keyof Plan, value: string | boolean | string[]) => {
         const newPlans = [...formData.plans];
         // @ts-ignore
         newPlans[index][key] = value;
-        setFormData(prev => ({...prev, plans: newPlans}));
+        setFormData(prev => prev ? ({...prev, plans: newPlans}) : undefined);
     };
 
     const addPlan = () => {
         const newPlan = { popular: false, title: 'New Plan', price: '$0', description: '', features: [] };
-        setFormData(prev => ({...prev, plans: [...prev.plans, newPlan]}));
+        setFormData(prev => prev ? ({...prev, plans: [...prev.plans, newPlan]}) : undefined);
     };
 
     const removePlan = (index: number) => {
         if (window.confirm('Are you sure you want to delete this service plan?')) {
             const newPlans = formData.plans.filter((_, i) => i !== index);
-            setFormData(prev => ({...prev, plans: newPlans}));
+            setFormData(prev => prev ? ({...prev, plans: newPlans}) : undefined);
         }
     };
     
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        setContent({ ...content, services: formData });
-        setStatus('Services section saved successfully!');
-        setTimeout(() => setStatus(''), 3000);
+        if (formData) {
+            updateSectionContent(sectionId, formData);
+            setStatus('Services section saved successfully!');
+            setTimeout(() => setStatus(''), 3000);
+        }
     };
 
     const handleReset = () => {
-        if (window.confirm("Are you sure you want to reset the Services section to its default content? This will update the database.")) {
-            setContent({ ...content, services: defaultContent.services });
-            setStatus('Services section has been reset to default.');
-            setTimeout(() => setStatus(''), 3000);
+        if (window.confirm("Are you sure you want to reset this section to its default content?")) {
+            const defaultSectionContent = defaultContent.sections.find(s => s.type === 'services')?.content;
+            if (defaultSectionContent) {
+                updateSectionContent(sectionId, defaultSectionContent);
+                setStatus('Services section has been reset.');
+                setTimeout(() => setStatus(''), 3000);
+            }
         }
     };
 

@@ -1,50 +1,50 @@
 
+
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea, ImageInput, FormCard } from './FormElements';
 import { defaultContent } from '../../../contexts/ContentContext';
+import { TestimonialsContent } from '../../../types';
 
-type Story = {
-    name: string;
-    achievement: string;
-    quote: string;
-    imageUrl: string;
-    avatarUrl: string;
-    tag: string;
-}
+type Story = TestimonialsContent['stories'][0];
 
 interface TestimonialsFormProps {
     openMediaLibrary: (onSelect: (url: string) => void) => void;
+    sectionId: string;
 }
 
-const TestimonialsForm: React.FC<TestimonialsFormProps> = ({ openMediaLibrary }) => {
-    const { content, setContent } = useContent();
-    const [formData, setFormData] = useState(content.testimonials);
+const TestimonialsForm: React.FC<TestimonialsFormProps> = ({ openMediaLibrary, sectionId }) => {
+    const { content, updateSectionContent } = useContent();
+    const sectionData = content.sections.find(s => s.id === sectionId)?.content as TestimonialsContent;
+
+    const [formData, setFormData] = useState<TestimonialsContent | undefined>(sectionData);
     const [status, setStatus] = useState('');
 
     useEffect(() => {
-        setFormData(content.testimonials);
-    }, [content.testimonials]);
+        setFormData(content.sections.find(s => s.id === sectionId)?.content as TestimonialsContent);
+    }, [content, sectionId]);
+    
+    if (!formData) return <div>Loading...</div>;
 
     const handleInputChange = (key: 'headline' | 'subheading', value: string) => {
-        setFormData(prev => ({ ...prev, [key]: value }));
+        setFormData(prev => prev ? ({ ...prev, [key]: value }) : undefined);
     };
     
     const handleStoryChange = (index: number, key: keyof Story, value: string) => {
         const newStories = [...formData.stories];
         newStories[index] = { ...newStories[index], [key]: value };
-        setFormData(prev => ({...prev, stories: newStories}));
+        setFormData(prev => prev ? ({...prev, stories: newStories}) : undefined);
     };
 
     const addStory = () => {
         const newStory = { name: 'New Client', achievement: '', quote: '', imageUrl: '', avatarUrl: '', tag: '' };
-        setFormData(prev => ({...prev, stories: [...prev.stories, newStory]}));
+        setFormData(prev => prev ? ({...prev, stories: [...prev.stories, newStory]}) : undefined);
     };
 
     const removeStory = (index: number) => {
         if (window.confirm('Are you sure you want to delete this testimonial?')) {
             const newStories = formData.stories.filter((_, i) => i !== index);
-            setFormData(prev => ({...prev, stories: newStories}));
+            setFormData(prev => prev ? ({...prev, stories: newStories}) : undefined);
         }
     };
 
@@ -62,16 +62,21 @@ const TestimonialsForm: React.FC<TestimonialsFormProps> = ({ openMediaLibrary })
     
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        setContent({ ...content, testimonials: formData });
-        setStatus('Testimonials section saved successfully!');
-        setTimeout(() => setStatus(''), 3000);
+        if (formData) {
+            updateSectionContent(sectionId, formData);
+            setStatus('Testimonials section saved successfully!');
+            setTimeout(() => setStatus(''), 3000);
+        }
     };
     
     const handleReset = () => {
-        if (window.confirm("Are you sure you want to reset the Testimonials section to its default content? This will update the database.")) {
-            setContent({ ...content, testimonials: defaultContent.testimonials });
-            setStatus('Testimonials section has been reset to default.');
-            setTimeout(() => setStatus(''), 3000);
+       if (window.confirm("Are you sure you want to reset this section to its default content?")) {
+            const defaultSectionContent = defaultContent.sections.find(s => s.type === 'testimonials')?.content;
+            if (defaultSectionContent) {
+                updateSectionContent(sectionId, defaultSectionContent);
+                setStatus('Testimonials section has been reset.');
+                setTimeout(() => setStatus(''), 3000);
+            }
         }
     };
 

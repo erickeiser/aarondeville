@@ -1,6 +1,7 @@
+
 import React from 'react';
-import { useContent } from '../hooks/useContent';
 import { StarIcon, PlayIcon } from './Icons';
+import { TestimonialsContent } from '../types';
 
 const TestimonialCard: React.FC<{ testimonial: any }> = ({ testimonial }) => (
   <div className="bg-[#1f1f1f] rounded-lg overflow-hidden flex flex-col">
@@ -31,12 +32,14 @@ const TestimonialCard: React.FC<{ testimonial: any }> = ({ testimonial }) => (
   </div>
 );
 
-const Testimonials: React.FC = () => {
-  const { content } = useContent();
-  const { testimonials: testimonialsContent } = content;
+interface TestimonialsProps {
+  content: TestimonialsContent;
+  id: string;
+}
 
+const Testimonials: React.FC<TestimonialsProps> = ({ content: testimonialsContent, id }) => {
   return (
-    <section id="testimonials" className="py-20 md:py-28 bg-[#121212]">
+    <section id={id} className="py-20 md:py-28 bg-[#121212]">
       <div className="container mx-auto px-6 text-center">
         <h2 className="text-3xl md:text-4xl font-bold">{testimonialsContent.headline}</h2>
         <p className="mt-4 text-gray-400 max-w-2xl mx-auto">

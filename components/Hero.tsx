@@ -1,15 +1,18 @@
+
 import React from 'react';
-import { useContent } from '../hooks/useContent';
 import { UsersIcon, StarIcon, BadgeCheckIcon } from './Icons';
+import { HeroContent } from '../types';
 
-const Hero: React.FC = () => {
-  const { content } = useContent();
-  const { hero: heroContent } = content;
+interface HeroProps {
+  content: HeroContent;
+  id: string;
+}
 
-  const isVideo = heroContent.imageUrl.match(/\.(mp4|webm|mov)$/i);
+const Hero: React.FC<HeroProps> = ({ content: heroContent, id }) => {
+  const isVideo = heroContent.imageUrl && heroContent.imageUrl.match(/\.(mp4|webm|mov)$/i);
 
   return (
-    <section id="home" className="py-20 md:py-32 bg-gradient-to-b from-[#1f1f1f] to-[#121212]">
+    <section id={id} className="py-20 md:py-32 bg-gradient-to-b from-[#1f1f1f] to-[#121212]">
       <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
         <div className="text-center md:text-left">
           <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
