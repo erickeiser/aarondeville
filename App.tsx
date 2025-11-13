@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect } from 'react';
 // Fix: Import useContent from hooks/useContent.ts
 import { ContentProvider } from './contexts/ContentContext';
@@ -34,7 +35,7 @@ const PublicSite = () => {
   const { content } = useContent();
 
   return (
-    <div className="bg-[#121212] text-white font-sans">
+    <div className="bg-[#1A1A1A] text-[#E8E6DC] font-sans">
       <Header />
       <main>
         {content.sections.map((section: SectionType) => {

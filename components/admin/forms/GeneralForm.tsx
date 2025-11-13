@@ -1,4 +1,5 @@
 
+
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { HeaderContent } from '../../../types';
@@ -77,7 +78,7 @@ const GeneralForm: React.FC = () => {
                                         id={`nav-href-${index}`}
                                         value={link.href}
                                         onChange={e => handleNavLinksChange(index, 'href', e.target.value)}
-                                        className="w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500 text-sm"
+                                        className="w-full border-gray-300 rounded-md shadow-sm focus:border-[#8C1E1E] focus:ring-[#8C1E1E] text-sm"
                                      >
                                         <option value="#">-- Select a Section --</option>
                                         {content.sections.map(s => (
@@ -85,7 +86,7 @@ const GeneralForm: React.FC = () => {
                                         ))}
                                      </select>
                                    </div>
-                                    <button type="button" onClick={() => removeNavLink(index)} className="text-red-600 hover:text-red-800 text-sm font-semibold pb-1 h-fit">Remove</button>
+                                    <button type="button" onClick={() => removeNavLink(index)} className="text-[#8C1E1E] hover:text-[#7a1a1a] text-sm font-semibold pb-1 h-fit">Remove</button>
                                 </div>
                             </div>
                         ))}
@@ -96,7 +97,7 @@ const GeneralForm: React.FC = () => {
 
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-6">
                 <div className="flex flex-col sm:flex-row items-center justify-between">
-                    <button type="submit" className="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-800 transition-colors w-full sm:w-auto mb-2 sm:mb-0">Save Changes</button>
+                    <button type="submit" className="bg-[#8C1E1E] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#7a1a1a] transition-colors w-full sm:w-auto mb-2 sm:mb-0">Save Changes</button>
                     {status && <p className="text-green-600 font-semibold text-sm">{status}</p>}
                 </div>
             </div>

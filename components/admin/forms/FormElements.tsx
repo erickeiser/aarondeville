@@ -1,5 +1,6 @@
 
 
+
 import React, { ChangeEvent, useRef, useState } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 
@@ -48,7 +49,7 @@ export const Input: React.FC<InputProps> = ({ label, id, value, onChange, type =
             id={id}
             value={value}
             onChange={onChange}
-            className="w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500 text-sm"
+            className="w-full border-gray-300 rounded-md shadow-sm focus:border-[#8C1E1E] focus:ring-[#8C1E1E] text-sm"
         />
     </div>
 );
@@ -68,7 +69,7 @@ export const Textarea: React.FC<TextareaProps> = ({ label, id, value, onChange, 
             value={value}
             onChange={onChange}
             rows={rows}
-            className="w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500 text-sm"
+            className="w-full border-gray-300 rounded-md shadow-sm focus:border-[#8C1E1E] focus:ring-[#8C1E1E] text-sm"
         />
     </div>
 );
@@ -128,7 +129,7 @@ export const ImageInput: React.FC<ImageInputProps> = ({ label, id, value, onChan
                     id={id}
                     value={value}
                     onChange={onChange}
-                    className="w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500 text-sm"
+                    className="w-full border-gray-300 rounded-md shadow-sm focus:border-[#8C1E1E] focus:ring-[#8C1E1E] text-sm"
                     placeholder="https://... or upload/select from library"
                 />
                  <input

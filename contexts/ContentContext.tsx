@@ -1,4 +1,5 @@
 
+
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { SiteContent, Section, SectionType, ContactContent } from '../types';
 import { supabase } from '../lib/supabaseClient';
@@ -248,7 +249,7 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
   
   if (loading) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#121212] text-white">
+        <div className="min-h-screen flex items-center justify-center bg-[#1A1A1A] text-[#E8E6DC]">
             <p className="text-xl">Loading Content...</p>
         </div>
     )

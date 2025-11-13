@@ -1,5 +1,6 @@
 
 
+
 import React from 'react';
 import {
   CogIcon,
@@ -63,7 +64,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeView, setActiveView }
                 onClick={() => setActiveView({type: item.id as 'pageStructure' | 'general' | 'media' | 'submissions' })}
                 className={`w-full text-left px-3 py-2 rounded-md transition-colors flex items-center text-sm font-medium ${
                   activeView.type === item.id 
-                  ? 'bg-red-700 text-white' 
+                  ? 'bg-[#8C1E1E] text-white' 
                   : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
               >
@@ -81,7 +82,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeView, setActiveView }
                 onClick={() => setActiveView({ type: 'section', id: section.id })}
                 className={`w-full text-left px-3 py-2 rounded-md transition-colors flex items-center text-sm font-medium ${
                   activeView.type === 'section' && activeView.id === section.id
-                  ? 'bg-red-700 text-white' 
+                  ? 'bg-[#8C1E1E] text-white' 
                   : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
               >
@@ -98,7 +99,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeView, setActiveView }
                     onClick={() => setActiveView({type: 'footer'})}
                     className={`w-full text-left px-3 py-2 rounded-md transition-colors flex items-center text-sm font-medium ${
                     activeView.type === 'footer'
-                    ? 'bg-red-700 text-white' 
+                    ? 'bg-[#8C1E1E] text-white' 
                     : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                     }`}
                 >

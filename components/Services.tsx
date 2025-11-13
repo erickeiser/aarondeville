@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { CheckIcon } from './Icons';
 import { ServicesContent } from '../types';
@@ -6,24 +7,24 @@ import { ServicesContent } from '../types';
 const ServiceCard: React.FC<{ plan: any }> = ({ plan }) => {
   const isPopular = plan.popular;
   return (
-    <div className={`rounded-xl p-8 flex flex-col h-full ${isPopular ? 'bg-white text-gray-800 border-4 border-red-700 relative' : 'bg-[#2a2a2a] text-white'}`}>
+    <div className={`rounded-xl p-8 flex flex-col h-full ${isPopular ? 'bg-[#1A1A1A] text-[#E8E6DC] border-4 border-[#8C1E1E] relative' : 'bg-[#3C4452] text-[#E8E6DC]'}`}>
       {isPopular && (
-        <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-red-700 text-white text-sm font-bold px-4 py-1 rounded-full">
+        <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-[#8C1E1E] text-[#E8E6DC] text-sm font-bold px-4 py-1 rounded-full">
           Most Popular
         </div>
       )}
       <h3 className="text-2xl font-bold">{plan.title}</h3>
-      <p className={`text-4xl font-extrabold my-4 ${isPopular ? 'text-red-700' : 'text-red-600'}`}>{plan.price}</p>
-      <p className={`mb-6 h-20 ${isPopular ? 'text-gray-600' : 'text-gray-400'}`}>{plan.description}</p>
+      <p className={`text-4xl font-extrabold my-4 ${isPopular ? 'text-[#8C1E1E]' : 'text-[#E8E6DC]'}`}>{plan.price}</p>
+      <p className={`mb-6 h-20 ${isPopular ? 'text-[#E8E6DC]/90' : 'text-[#E8E6DC]/90'}`}>{plan.description}</p>
       <ul className="space-y-3 mb-8 flex-grow">
         {plan.features.map((feature: string, index: number) => (
           <li key={index} className="flex items-start">
-            <CheckIcon className={`h-6 w-6 mr-2 flex-shrink-0 ${isPopular ? 'text-red-700' : 'text-red-600'}`} />
+            <CheckIcon className={`h-6 w-6 mr-2 flex-shrink-0 ${isPopular ? 'text-[#8C1E1E]' : 'text-[#E8E6DC]'}`} />
             <span>{feature}</span>
           </li>
         ))}
       </ul>
-      <button className={`w-full py-3 rounded-lg font-semibold transition-colors mt-auto ${isPopular ? 'bg-red-700 text-white hover:bg-red-800' : 'bg-gray-700 hover:bg-gray-600'}`}>
+      <button className={`w-full py-3 rounded-lg font-semibold transition-colors mt-auto ${isPopular ? 'bg-[#8C1E1E] text-[#E8E6DC] hover:bg-[#7a1a1a]' : 'bg-[#1A1A1A] text-[#E8E6DC] hover:bg-black'}`}>
         Get Started
       </button>
     </div>
@@ -37,10 +38,10 @@ interface ServicesProps {
 
 const Services: React.FC<ServicesProps> = ({ content: servicesContent, id }) => {
   return (
-    <section id={id} className="py-20 md:py-28 bg-gray-200">
+    <section id={id} className="py-20 md:py-28 bg-[#E8E6DC]">
       <div className="container mx-auto px-6 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-800">{servicesContent.headline}</h2>
-        <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
+        <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A]">{servicesContent.headline}</h2>
+        <p className="mt-4 text-[#1A1A1A]/90 max-w-2xl mx-auto">
           {servicesContent.subheading}
         </p>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12 text-left">

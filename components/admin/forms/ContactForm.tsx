@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea, FormCard } from './FormElements';
@@ -111,7 +112,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ sectionId }) => {
             
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mt-6">
                 <div className="flex items-center justify-between">
-                    <button type="submit" className="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-800 transition-colors">Save Changes</button>
+                    <button type="submit" className="bg-[#8C1E1E] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#7a1a1a] transition-colors">Save Changes</button>
                     {status && <p className="text-green-600 font-semibold text-sm">{status}</p>}
                 </div>
             </div>

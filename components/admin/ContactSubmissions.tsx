@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { TrashIcon } from '../Icons';
@@ -74,7 +75,7 @@ const ContactSubmissions: React.FC = () => {
                                         </div>
                                         <button 
                                             onClick={() => handleDelete(sub.id)}
-                                            className="text-red-500 hover:text-red-700 p-1"
+                                            className="text-[#8C1E1E] hover:text-[#7a1a1a] p-1"
                                             title="Delete Submission"
                                         >
                                             <TrashIcon className="h-5 w-5" />

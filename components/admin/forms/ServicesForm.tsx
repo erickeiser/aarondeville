@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea, FormCard } from './FormElements';
@@ -83,11 +84,11 @@ const ServicesForm: React.FC<ServicesFormProps> = ({ sectionId }) => {
                         <div key={index} className="p-4 bg-gray-50 border rounded-lg space-y-4 relative">
                             <div className="flex justify-between items-center">
                                 <h4 className="font-semibold text-lg text-gray-700">Plan {index + 1}</h4>
-                                <button type="button" onClick={() => removePlan(index)} className="text-red-500 hover:text-red-700 text-sm font-bold">Remove</button>
+                                <button type="button" onClick={() => removePlan(index)} className="text-[#8C1E1E] hover:text-[#7a1a1a] text-sm font-bold">Remove</button>
                             </div>
                              
                             <div className="flex items-center">
-                                <input type="checkbox" id={`popular-${index}`} checked={plan.popular} onChange={e => handlePlanChange(index, 'popular', e.target.checked)} className="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500"/>
+                                <input type="checkbox" id={`popular-${index}`} checked={plan.popular} onChange={e => handlePlanChange(index, 'popular', e.target.checked)} className="h-4 w-4 text-[#8C1E1E] border-gray-300 rounded focus:ring-[#8C1E1E]"/>
                                 <label htmlFor={`popular-${index}`} className="ml-2 block text-sm text-gray-900">Most Popular?</label>
                             </div>
                             
@@ -103,7 +104,7 @@ const ServicesForm: React.FC<ServicesFormProps> = ({ sectionId }) => {
 
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mt-6">
                 <div className="flex items-center justify-between">
-                    <button type="submit" className="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-800 transition-colors">Save Changes</button>
+                    <button type="submit" className="bg-[#8C1E1E] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#7a1a1a] transition-colors">Save Changes</button>
                     {status && <p className="text-green-600 font-semibold text-sm">{status}</p>}
                 </div>
             </div>

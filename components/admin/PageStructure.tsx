@@ -1,5 +1,6 @@
 
 
+
 import React, { useState } from 'react';
 // Fix: Import useContent from hooks and availableSections from context separately.
 import { availableSections } from '../../contexts/ContentContext';
@@ -35,7 +36,7 @@ const PageStructure: React.FC = () => {
                     <select
                         value={selectedSectionType}
                         onChange={(e) => setSelectedSectionType(e.target.value as SectionType)}
-                        className="w-full max-w-xs border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500 text-sm"
+                        className="w-full max-w-xs border-gray-300 rounded-md shadow-sm focus:border-[#8C1E1E] focus:ring-[#8C1E1E] text-sm"
                     >
                         {availableSections.map(s => (
                             <option key={s.type} value={s.type}>{s.name}</option>
@@ -74,7 +75,7 @@ const PageStructure: React.FC = () => {
                                 >
                                     ▼
                                 </button>
-                                <button onClick={() => removeSection(section.id)} className="p-1.5 text-red-600 hover:text-red-800">
+                                <button onClick={() => removeSection(section.id)} className="p-1.5 text-[#8C1E1E] hover:text-[#7a1a1a]">
                                     <TrashIcon className="h-5 w-5" />
                                 </button>
                             </div>

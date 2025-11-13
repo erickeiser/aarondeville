@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 
@@ -58,7 +59,7 @@ const AdminLogin: React.FC = () => {
           {error && <p className="text-red-500 text-xs italic mb-4">{error}</p>}
           <div className="flex items-center justify-between">
             <button
-              className="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full disabled:bg-red-400"
+              className="bg-[#8C1E1E] hover:bg-[#7a1a1a] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full disabled:bg-[#8C1E1E]/50"
               type="submit"
               disabled={loading}
             >
@@ -67,7 +68,7 @@ const AdminLogin: React.FC = () => {
           </div>
         </form>
          <p className="text-center text-gray-500 text-xs mt-6">
-            <a href="#/" className="hover:text-red-700">&larr; Back to website</a>
+            <a href="#/" className="hover:text-[#8C1E1E]">&larr; Back to website</a>
         </p>
       </div>
     </div>

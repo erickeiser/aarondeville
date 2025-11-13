@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useContent } from '../../hooks/useContent';
 
@@ -16,7 +17,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ onLogout }) => {
         </h1>
         <button
           onClick={onLogout}
-          className="bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition-colors"
+          className="bg-[#8C1E1E] text-white px-4 py-2 rounded-md font-semibold hover:bg-[#7a1a1a] transition-colors"
         >
           Log Out
         </button>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { FileObject } from '@supabase/storage-js';
@@ -119,7 +120,7 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ isModal, onSelect }) => {
             )}
            
             <div 
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragging ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-gray-50'}`}
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragging ? 'border-[#8C1E1E] bg-red-50' : 'border-gray-300 bg-gray-50'}`}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
@@ -137,7 +138,7 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ isModal, onSelect }) => {
                     className="hidden"
                     disabled={uploading}
                 />
-                <label htmlFor="file-upload" className={`mt-2 inline-block px-4 py-2 text-sm font-semibold rounded-md transition-colors ${uploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 text-white hover:bg-red-700 cursor-pointer'}`}>
+                <label htmlFor="file-upload" className={`mt-2 inline-block px-4 py-2 text-sm font-semibold rounded-md transition-colors ${uploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#8C1E1E] text-white hover:bg-[#7a1a1a] cursor-pointer'}`}>
                     {uploading ? 'Uploading...' : 'Select Files'}
                 </label>
             </div>
@@ -162,7 +163,7 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ isModal, onSelect }) => {
                                         <p className="text-white text-xs break-words">{file.name}</p>
                                         <div className="flex flex-col gap-1">
                                             {isModal && onSelect && (
-                                                <button onClick={() => onSelect(publicUrl)} className="w-full bg-red-600 text-white text-xs font-bold py-1 px-2 rounded hover:bg-red-700">
+                                                <button onClick={() => onSelect(publicUrl)} className="w-full bg-[#8C1E1E] text-white text-xs font-bold py-1 px-2 rounded hover:bg-[#7a1a1a]">
                                                     Select
                                                 </button>
                                             )}
@@ -173,7 +174,7 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ isModal, onSelect }) => {
                                                 <button onClick={() => copyToClipboard(publicUrl)} className="bg-gray-200 p-1.5 rounded hover:bg-white text-gray-700" title="Copy URL">
                                                     <ClipboardCopyIcon className="h-4 w-4"/>
                                                 </button>
-                                                <button onClick={() => handleDelete(file.name)} className="bg-red-200 text-red-700 p-1.5 rounded hover:bg-red-300" title="Delete">
+                                                <button onClick={() => handleDelete(file.name)} className="bg-[#8C1E1E]/20 text-[#8C1E1E] p-1.5 rounded hover:bg-[#8C1E1E]/30" title="Delete">
                                                     <TrashIcon className="h-4 w-4"/>
                                                 </button>
                                             </div>
