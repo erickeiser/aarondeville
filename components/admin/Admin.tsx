@@ -48,7 +48,7 @@ const Admin: React.FC = () => {
   const [activeView, setActiveView] = useState<ActiveView>({ type: 'pageStructure' });
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [mediaModalCallback, setMediaModalCallback] = useState<(url: string) => void>(() => () => {});
-  const { content, versioningEnabled } = useContent();
+  const { content, versioningStatus } = useContent();
 
   useEffect(() => {
     const getSession = async () => {
@@ -115,10 +115,15 @@ const Admin: React.FC = () => {
       <div className="flex">
         <AdminSidebar activeView={activeView} setActiveView={setActiveView} />
         <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-            {!versioningEnabled && (
+            {versioningStatus !== 'enabled' && (
                 <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 mb-6 rounded-r-lg" role="alert">
                     <p className="font-bold">Warning: Save Conflict Detection is Disabled</p>
-                    <p className="text-sm">Your database is missing a required column (`updated_at`). To prevent accidentally overwriting changes from other users, please run the SQL migration scripts provided previously.</p>
+                    {versioningStatus === 'no_column' && (
+                         <p className="text-sm">Your database is missing the `updated_at` column. To prevent accidentally overwriting changes, please run the SQL migration scripts provided previously.</p>
+                    )}
+                     {versioningStatus === 'no_function' && (
+                         <p className="text-sm">Your database is missing the `safe_update_content` function. To prevent accidentally overwriting changes, please run the SQL migration scripts provided previously.</p>
+                    )}
                 </div>
             )}
             {renderActiveView()}

@@ -143,6 +143,8 @@ export const availableSections = Object.keys(defaultSections).map(type => ({
     name: type.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()) + ' Section'
 }));
 
+export type VersioningStatus = 'enabled' | 'no_column' | 'no_function';
+
 export const ContentContext = createContext<{
   content: SiteContent;
   setContent: (content: SiteContent) => Promise<boolean>;
@@ -151,7 +153,7 @@ export const ContentContext = createContext<{
   updateSectionContent: (sectionId: string, newContent: any) => Promise<boolean>;
   removeSection: (sectionId: string) => void;
   reorderSections: (sections: Section[]) => void;
-  versioningEnabled: boolean;
+  versioningStatus: VersioningStatus;
 }>({
   content: defaultContent,
   setContent: async () => false,
@@ -160,7 +162,7 @@ export const ContentContext = createContext<{
   updateSectionContent: async () => false,
   removeSection: () => {},
   reorderSections: () => {},
-  versioningEnabled: true,
+  versioningStatus: 'enabled',
 });
 
 export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -169,7 +171,7 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [conflictError, setConflictError] = useState<string | null>(null);
   const [criticalError, setCriticalError] = useState<string | null>(null);
-  const [versioningEnabled, setVersioningEnabled] = useState(true);
+  const [versioningStatus, setVersioningStatus] = useState<VersioningStatus>('enabled');
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -184,7 +186,7 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
       // If the specific error for a missing column occurs ('42703: undefined_column'), fall back gracefully
       if (error && error.code === '42703') {
         console.warn("Versioning column 'updated_at' not found. Falling back to unsafe saves. Please run the database migration script to enable save conflict detection.");
-        setVersioningEnabled(false);
+        setVersioningStatus('no_column');
         
         // Retry fetching only the content
         const secondAttempt = await supabase
@@ -233,7 +235,7 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (newError) {
             console.warn('Could not fetch timestamp after insert. Versioning might be disabled.', newError.message);
             if (newError.code === '42703') {
-                setVersioningEnabled(false);
+                setVersioningStatus('no_column');
             }
         } else if (newData) {
             setUpdatedAt(newData.updated_at);
@@ -248,39 +250,55 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
   const updateDatabase = async (newContent: SiteContent): Promise<boolean> => {
     if (conflictError) return false;
 
-    if (versioningEnabled) {
-      const { error } = await supabase.rpc('safe_update_content', {
-          new_content: newContent,
-          last_updated_at: updatedAt,
+    // We start assuming we can do a safe update
+    let performUnsafeUpdate = versioningStatus !== 'enabled';
+
+    if (versioningStatus === 'enabled') {
+      const { error: rpcError } = await supabase.rpc('safe_update_content', {
+        new_content: newContent,
+        last_updated_at: updatedAt,
       });
 
-      if (error) {
-          console.error('Error saving content:', error);
-          if (error.message.includes('conflict')) {
-              setConflictError('Your changes could not be saved because the content was updated by someone else. Please refresh the page to get the latest version. Your current changes will be lost.');
-          } else {
-              setConflictError(`An unexpected error occurred: ${error.message}`);
-          }
+      if (rpcError) {
+        console.error('Safe update failed:', rpcError.message);
+        if (rpcError.message.includes('conflict')) {
+          setConflictError('Your changes could not be saved because the content was updated by someone else. Please refresh the page to get the latest version. Your current changes will be lost.');
+          return false; // Hard stop for conflict
+        }
+        if (rpcError.message.includes('Could not find the function')) {
+          console.warn("RPC function 'safe_update_content' not found. Falling back to unsafe saves.");
+          setVersioningStatus('no_function');
+          performUnsafeUpdate = true; // Set flag to fall through to unsafe update
+        } else {
+          // Any other RPC error
+          setConflictError(`An unexpected error occurred: ${rpcError.message}`);
           return false;
+        }
       } else {
-          const { data } = await supabase.from('website_content').select('updated_at').eq('id', 1).single();
-          if (data) setUpdatedAt(data.updated_at);
-          return true;
+        // Successful safe update
+        const { data } = await supabase.from('website_content').select('updated_at').eq('id', 1).single();
+        if (data) setUpdatedAt(data.updated_at);
+        return true;
       }
-    } else {
-      // Unsafe update without version checking
-      const { error } = await supabase
+    }
+
+    // This block runs if versioning was already disabled OR if the safe update just failed because the function was missing
+    if (performUnsafeUpdate) {
+      const { error: updateError } = await supabase
         .from('website_content')
         .update({ content: newContent })
         .eq('id', 1);
 
-      if (error) {
-        console.error('Error saving content (unsafe):', error);
-        setConflictError(`An unexpected error occurred: ${error.message}`);
+      if (updateError) {
+        console.error('Unsafe update failed:', updateError.message);
+        setConflictError(`An unexpected error occurred during save: ${updateError.message}`);
         return false;
       }
-      return true;
+      return true; // Successful unsafe update
     }
+
+    // Should not be reached, but as a fallback
+    return false;
   };
 
   const setContent = async (newContent: SiteContent): Promise<boolean> => {
@@ -346,7 +364,7 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
   }
 
   return (
-    <ContentContext.Provider value={{ content, setContent, resetContent, addSection, updateSectionContent, removeSection, reorderSections, versioningEnabled }}>
+    <ContentContext.Provider value={{ content, setContent, resetContent, addSection, updateSectionContent, removeSection, reorderSections, versioningStatus }}>
       {children}
       {conflictError && (
         <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4" aria-modal="true" role="dialog">
