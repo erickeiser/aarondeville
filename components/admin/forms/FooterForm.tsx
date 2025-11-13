@@ -9,6 +9,7 @@ const FooterForm: React.FC = () => {
     const { content, setContent } = useContent();
     const [formData, setFormData] = useState(content.footer);
     const [status, setStatus] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         setFormData(content.footer);
@@ -25,11 +26,18 @@ const FooterForm: React.FC = () => {
         }));
     };
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setContent({ ...content, footer: formData });
-        setStatus('Footer section saved successfully!');
-        setTimeout(() => setStatus(''), 3000);
+        setIsSaving(true);
+        setStatus('Saving...');
+        const success = await setContent({ ...content, footer: formData });
+        setIsSaving(false);
+        if (success) {
+            setStatus('Footer section saved successfully!');
+            setTimeout(() => setStatus(''), 3000);
+        } else {
+            setStatus('Save failed. Content was updated elsewhere.');
+        }
     };
 
     const handleReset = () => {
@@ -67,7 +75,9 @@ const FooterForm: React.FC = () => {
            
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mt-6">
                 <div className="flex items-center justify-between">
-                    <button type="submit" className="bg-[#8C1E1E] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#7a1a1a] transition-colors">Save Changes</button>
+                    <button type="submit" disabled={isSaving} className="bg-[#8C1E1E] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#7a1a1a] transition-colors disabled:bg-gray-400">
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
                     {status && <p className="text-green-600 font-semibold text-sm">{status}</p>}
                 </div>
             </div>

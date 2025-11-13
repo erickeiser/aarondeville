@@ -10,6 +10,7 @@ const GeneralForm: React.FC = () => {
     const { content, setContent } = useContent();
     const [headerData, setHeaderData] = useState<HeaderContent>(content.header);
     const [status, setStatus] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         setHeaderData(content.header);
@@ -37,11 +38,19 @@ const GeneralForm: React.FC = () => {
         }
     };
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setContent({ ...content, header: headerData });
-        setStatus('Settings saved successfully!');
-        setTimeout(() => setStatus(''), 3000);
+        setIsSaving(true);
+        setStatus('Saving...');
+        const success = await setContent({ ...content, header: headerData });
+        setIsSaving(false);
+
+        if (success) {
+            setStatus('Settings saved successfully!');
+            setTimeout(() => setStatus(''), 3000);
+        } else {
+            setStatus('Save failed. Content was updated elsewhere.');
+        }
     };
     
     const handleReset = () => {
@@ -97,7 +106,9 @@ const GeneralForm: React.FC = () => {
 
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-6">
                 <div className="flex flex-col sm:flex-row items-center justify-between">
-                    <button type="submit" className="bg-[#8C1E1E] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#7a1a1a] transition-colors w-full sm:w-auto mb-2 sm:mb-0">Save Changes</button>
+                    <button type="submit" disabled={isSaving} className="bg-[#8C1E1E] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#7a1a1a] transition-colors w-full sm:w-auto mb-2 sm:mb-0 disabled:bg-gray-400">
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
                     {status && <p className="text-green-600 font-semibold text-sm">{status}</p>}
                 </div>
             </div>

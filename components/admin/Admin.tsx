@@ -1,6 +1,7 @@
 
 
 
+
 import React, { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabaseClient';
@@ -20,6 +21,9 @@ import PageStructure from './PageStructure';
 import VideoForm from './forms/VideoForm';
 import ContactSubmissions from './ContactSubmissions';
 import { useContent } from '../../hooks/useContent';
+import WriteSuccessStoryForm from './forms/WriteSuccessStoryForm';
+import ConsultationForm from './forms/ConsultationForm';
+import IntakeFormForm from './forms/IntakeFormForm';
 
 type ActiveView = 
   | { type: 'general' | 'footer' | 'media' | 'pageStructure' | 'submissions' }
@@ -32,11 +36,9 @@ const componentFormMap: { [key: string]: React.ComponentType<any> } = {
   testimonials: TestimonialsForm,
   contact: ContactForm,
   video: VideoForm,
-  // Sections without dedicated forms can be handled or ignored
-  // Fix: Removed {...props} spread to prevent passing invalid attributes to the div element.
-  consultation: (props: any) => <div className="bg-white p-6 rounded-lg shadow-sm border">This section is editable under "Site Settings".</div>,
-  writeSuccessStory: (props: any) => <div className="bg-white p-6 rounded-lg shadow-sm border">This section is editable under "Site Settings".</div>,
-  intakeForm: (props: any) => <div className="bg-white p-6 rounded-lg shadow-sm border">This section is editable under "Site Settings".</div>,
+  writeSuccessStory: WriteSuccessStoryForm,
+  consultation: ConsultationForm,
+  intakeForm: IntakeFormForm,
 };
 
 
@@ -46,8 +48,7 @@ const Admin: React.FC = () => {
   const [activeView, setActiveView] = useState<ActiveView>({ type: 'pageStructure' });
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [mediaModalCallback, setMediaModalCallback] = useState<(url: string) => void>(() => () => {});
-  // Fix: Call useContent at the top level of the component to follow hook rules.
-  const { content } = useContent();
+  const { content, versioningEnabled } = useContent();
 
   useEffect(() => {
     const getSession = async () => {
@@ -87,7 +88,6 @@ const Admin: React.FC = () => {
 
   const renderActiveView = () => {
     switch (activeView.type) {
-      // Fix: GeneralForm does not accept any props, so remove the spread.
       case 'general': return <GeneralForm />;
       case 'footer': return <FooterForm />;
       case 'media': return <MediaLibrary isModal={false} />;
@@ -99,10 +99,8 @@ const Admin: React.FC = () => {
         const FormComponent = componentFormMap[section.type];
         if (!FormComponent) return <div>No editor for this section type: {section.type}</div>;
 
-        // Fix: Conditionally build props object to only pass `openMediaLibrary` to components that need it.
-        // This resolves the error and makes the component logic more robust.
         const formProps: any = { sectionId: section.id };
-        if (['hero', 'about', 'testimonials'].includes(section.type)) {
+        if (['hero', 'about', 'testimonials', 'writeSuccessStory'].includes(section.type)) {
           formProps.openMediaLibrary = openMediaLibrary;
         }
 
@@ -117,6 +115,12 @@ const Admin: React.FC = () => {
       <div className="flex">
         <AdminSidebar activeView={activeView} setActiveView={setActiveView} />
         <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+            {!versioningEnabled && (
+                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 mb-6 rounded-r-lg" role="alert">
+                    <p className="font-bold">Warning: Save Conflict Detection is Disabled</p>
+                    <p className="text-sm">Your database is missing a required column (`updated_at`). To prevent accidentally overwriting changes from other users, please run the SQL migration scripts provided previously.</p>
+                </div>
+            )}
             {renderActiveView()}
         </main>
       </div>

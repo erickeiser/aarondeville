@@ -145,41 +145,67 @@ export const availableSections = Object.keys(defaultSections).map(type => ({
 
 export const ContentContext = createContext<{
   content: SiteContent;
-  setContent: (content: SiteContent) => void;
+  setContent: (content: SiteContent) => Promise<boolean>;
   resetContent: () => void;
   addSection: (type: SectionType) => void;
-  updateSectionContent: (sectionId: string, newContent: any) => void;
+  updateSectionContent: (sectionId: string, newContent: any) => Promise<boolean>;
   removeSection: (sectionId: string) => void;
   reorderSections: (sections: Section[]) => void;
+  versioningEnabled: boolean;
 }>({
   content: defaultContent,
-  setContent: () => {},
+  setContent: async () => false,
   resetContent: () => {},
   addSection: () => {},
-  updateSectionContent: () => {},
+  updateSectionContent: async () => false,
   removeSection: () => {},
   reorderSections: () => {},
+  versioningEnabled: true,
 });
 
 export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [content, setContentState] = useState<SiteContent>(defaultContent);
   const [loading, setLoading] = useState(true);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [conflictError, setConflictError] = useState<string | null>(null);
+  const [criticalError, setCriticalError] = useState<string | null>(null);
+  const [versioningEnabled, setVersioningEnabled] = useState(true);
 
   useEffect(() => {
     const fetchContent = async () => {
-      const { data, error } = await supabase
+      setCriticalError(null);
+      // Attempt to fetch with the versioning column first
+      let { data, error } = await supabase
         .from('website_content')
-        .select('content')
+        .select('content, updated_at')
         .eq('id', 1)
         .single();
 
+      // If the specific error for a missing column occurs ('42703: undefined_column'), fall back gracefully
+      if (error && error.code === '42703') {
+        console.warn("Versioning column 'updated_at' not found. Falling back to unsafe saves. Please run the database migration script to enable save conflict detection.");
+        setVersioningEnabled(false);
+        
+        // Retry fetching only the content
+        const secondAttempt = await supabase
+          .from('website_content')
+          .select('content')
+          .eq('id', 1)
+          .single();
+        
+        data = secondAttempt.data as any; // Cast to avoid TS errors, we know updated_at is missing
+        error = secondAttempt.error;
+      }
+
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching content:', error);
+        console.error('Error fetching content:', error.message);
+        setCriticalError(`Could not load website data. This might be due to a network issue or a problem with the database setup (e.g., missing 'website_content' table or incorrect read permissions). Error: ${error.message}`);
+        setLoading(false);
+        return;
       }
 
       if (data && data.content) {
         const fetchedContent = data.content as SiteContent;
-        // Fix: Added data integrity check for navLinks
         if (!fetchedContent.header || !Array.isArray(fetchedContent.header.navLinks)) {
             fetchedContent.header = { ...fetchedContent.header, navLinks: defaultContent.header.navLinks };
         }
@@ -187,12 +213,31 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
             fetchedContent.sections = defaultContent.sections;
         }
         setContentState(fetchedContent);
+        if (data.updated_at) {
+          setUpdatedAt(data.updated_at);
+        }
       } else {
         console.log('No content found, initializing with default content.');
         const { error: insertError } = await supabase
           .from('website_content')
           .insert({ id: 1, content: defaultContent });
-        if (insertError) console.error('Error initializing content:', insertError);
+        
+        if (insertError) {
+            console.error('Error initializing content:', insertError.message);
+            setCriticalError(`Successfully connected to the database, but could not create the initial website content. Please ensure the public 'anon' key has permission to insert into the 'website_content' table. Error: ${insertError.message}`);
+            setLoading(false);
+            return;
+        }
+        // After successful insert, try to get the new timestamp
+        const { data: newData, error: newError } = await supabase.from('website_content').select('updated_at').eq('id', 1).single();
+        if (newError) {
+            console.warn('Could not fetch timestamp after insert. Versioning might be disabled.', newError.message);
+            if (newError.code === '42703') {
+                setVersioningEnabled(false);
+            }
+        } else if (newData) {
+            setUpdatedAt(newData.updated_at);
+        }
       }
       setLoading(false);
     };
@@ -200,17 +245,50 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
     fetchContent();
   }, []);
   
-  const updateDatabase = async (newContent: SiteContent) => {
-    const { error } = await supabase
-      .from('website_content')
-      .update({ content: newContent })
-      .eq('id', 1);
-    if (error) console.error('Error saving content:', error);
+  const updateDatabase = async (newContent: SiteContent): Promise<boolean> => {
+    if (conflictError) return false;
+
+    if (versioningEnabled) {
+      const { error } = await supabase.rpc('safe_update_content', {
+          new_content: newContent,
+          last_updated_at: updatedAt,
+      });
+
+      if (error) {
+          console.error('Error saving content:', error);
+          if (error.message.includes('conflict')) {
+              setConflictError('Your changes could not be saved because the content was updated by someone else. Please refresh the page to get the latest version. Your current changes will be lost.');
+          } else {
+              setConflictError(`An unexpected error occurred: ${error.message}`);
+          }
+          return false;
+      } else {
+          const { data } = await supabase.from('website_content').select('updated_at').eq('id', 1).single();
+          if (data) setUpdatedAt(data.updated_at);
+          return true;
+      }
+    } else {
+      // Unsafe update without version checking
+      const { error } = await supabase
+        .from('website_content')
+        .update({ content: newContent })
+        .eq('id', 1);
+
+      if (error) {
+        console.error('Error saving content (unsafe):', error);
+        setConflictError(`An unexpected error occurred: ${error.message}`);
+        return false;
+      }
+      return true;
+    }
   };
 
-  const setContent = (newContent: SiteContent) => {
-    setContentState(newContent);
-    updateDatabase(newContent);
+  const setContent = async (newContent: SiteContent): Promise<boolean> => {
+    const success = await updateDatabase(newContent);
+    if (success) {
+      setContentState(newContent);
+    }
+    return success;
   };
   
   const resetContent = () => {
@@ -229,11 +307,11 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
     setContent(newContent);
   };
 
-  const updateSectionContent = (sectionId: string, newSectionContent: any) => {
+  const updateSectionContent = async (sectionId: string, newSectionContent: any): Promise<boolean> => {
     const newSections = content.sections.map(section =>
       section.id === sectionId ? { ...section, content: newSectionContent } : section
     );
-    setContent({ ...content, sections: newSections });
+    return await setContent({ ...content, sections: newSections });
   };
   
   const removeSection = (sectionId: string) => {
@@ -255,9 +333,35 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
     )
   }
 
+  if (criticalError) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-red-100 text-red-900 p-8 font-sans">
+            <div className="text-center max-w-3xl">
+                <h1 className="text-2xl font-bold mb-4">A critical error occurred</h1>
+                <p className="bg-red-200 p-4 rounded-md text-left">{criticalError}</p>
+                <p className="mt-4 text-sm">Please check the browser console for more details and verify your Supabase configuration, including table names and Row Level Security policies.</p>
+            </div>
+        </div>
+    )
+  }
+
   return (
-    <ContentContext.Provider value={{ content, setContent, resetContent, addSection, updateSectionContent, removeSection, reorderSections }}>
+    <ContentContext.Provider value={{ content, setContent, resetContent, addSection, updateSectionContent, removeSection, reorderSections, versioningEnabled }}>
       {children}
+      {conflictError && (
+        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4" aria-modal="true" role="dialog">
+            <div className="bg-white rounded-lg shadow-2xl p-8 max-w-lg text-center">
+                <h2 className="text-2xl font-bold text-red-600 mb-4">Save Conflict</h2>
+                <p className="text-gray-700 mb-6">{conflictError}</p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="bg-blue-600 text-white font-bold py-2 px-6 rounded-md hover:bg-blue-700 transition-colors"
+                >
+                    Refresh Page
+                </button>
+            </div>
+        </div>
+      )}
     </ContentContext.Provider>
   );
 };

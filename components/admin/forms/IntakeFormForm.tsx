@@ -1,25 +1,24 @@
 
-
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea, FormCard } from './FormElements';
 import { defaultContent } from '../../../contexts/ContentContext';
-import { VideoContent } from '../../../types';
+import { IntakeFormContent } from '../../../types';
 
-interface VideoFormProps {
+interface IntakeFormFormProps {
     sectionId: string;
 }
 
-const VideoForm: React.FC<VideoFormProps> = ({ sectionId }) => {
+const IntakeFormForm: React.FC<IntakeFormFormProps> = ({ sectionId }) => {
     const { content, updateSectionContent } = useContent();
-    const sectionData = content.sections.find(s => s.id === sectionId)?.content as VideoContent;
+    const sectionData = content.sections.find(s => s.id === sectionId)?.content as IntakeFormContent;
     
-    const [formData, setFormData] = useState<VideoContent | undefined>(sectionData);
+    const [formData, setFormData] = useState<IntakeFormContent | undefined>(sectionData);
     const [status, setStatus] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        setFormData(content.sections.find(s => s.id === sectionId)?.content as VideoContent);
+        setFormData(content.sections.find(s => s.id === sectionId)?.content as IntakeFormContent);
     }, [content, sectionId]);
 
     if (!formData) {
@@ -38,7 +37,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ sectionId }) => {
             const success = await updateSectionContent(sectionId, formData);
             setIsSaving(false);
             if (success) {
-                setStatus('Video section saved successfully!');
+                setStatus('Section saved successfully!');
                 setTimeout(() => setStatus(''), 3000);
             } else {
                 setStatus('Save failed. Content was updated elsewhere.');
@@ -48,10 +47,10 @@ const VideoForm: React.FC<VideoFormProps> = ({ sectionId }) => {
 
     const handleReset = () => {
         if (window.confirm("Are you sure you want to reset this section to its default content?")) {
-            const defaultSectionContent = defaultContent.sections.find(s => s.type === 'video')?.content;
+            const defaultSectionContent = defaultContent.sections.find(s => s.type === 'intakeForm')?.content;
             if (defaultSectionContent) {
                 updateSectionContent(sectionId, defaultSectionContent);
-                setStatus('Video section has been reset.');
+                setStatus('Section has been reset.');
                 setTimeout(() => setStatus(''), 3000);
             }
         }
@@ -59,15 +58,12 @@ const VideoForm: React.FC<VideoFormProps> = ({ sectionId }) => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Edit Video Section</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Edit Intake Form Section</h2>
             
-            <FormCard title="Video Content" onReset={handleReset}>
+            <FormCard title="Main Content" onReset={handleReset}>
+                <p className="text-sm text-gray-600 mb-4">This section edits the title and subtitle that appear above the form. The form fields themselves are fixed and cannot be changed from this panel.</p>
                 <Input label="Headline" id="headline" value={formData.headline} onChange={e => handleInputChange('headline', e.target.value)} />
                 <Textarea label="Subheading" id="subheading" value={formData.subheading} onChange={e => handleInputChange('subheading', e.target.value)} />
-                <Input label="YouTube Video ID" id="videoId" value={formData.videoId} onChange={e => handleInputChange('videoId', e.target.value)} />
-                <p className="text-xs text-gray-500">
-                    This is the unique ID from a YouTube URL. For example, in `https://www.youtube.com/watch?v=g_tea8ZN-ZE`, the ID is `g_tea8ZN-ZE`.
-                </p>
             </FormCard>
 
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mt-6">
@@ -82,4 +78,4 @@ const VideoForm: React.FC<VideoFormProps> = ({ sectionId }) => {
     );
 };
 
-export default VideoForm;
+export default IntakeFormForm;

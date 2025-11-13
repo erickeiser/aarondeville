@@ -19,6 +19,7 @@ const ServicesForm: React.FC<ServicesFormProps> = ({ sectionId }) => {
     
     const [formData, setFormData] = useState<ServicesContent | undefined>(sectionData);
     const [status, setStatus] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         setFormData(content.sections.find(s => s.id === sectionId)?.content as ServicesContent);
@@ -49,12 +50,19 @@ const ServicesForm: React.FC<ServicesFormProps> = ({ sectionId }) => {
         }
     };
     
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (formData) {
-            updateSectionContent(sectionId, formData);
-            setStatus('Services section saved successfully!');
-            setTimeout(() => setStatus(''), 3000);
+            setIsSaving(true);
+            setStatus('Saving...');
+            const success = await updateSectionContent(sectionId, formData);
+            setIsSaving(false);
+            if (success) {
+                setStatus('Services section saved successfully!');
+                setTimeout(() => setStatus(''), 3000);
+            } else {
+                setStatus('Save failed. Content was updated elsewhere.');
+            }
         }
     };
 
@@ -104,7 +112,9 @@ const ServicesForm: React.FC<ServicesFormProps> = ({ sectionId }) => {
 
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mt-6">
                 <div className="flex items-center justify-between">
-                    <button type="submit" className="bg-[#8C1E1E] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#7a1a1a] transition-colors">Save Changes</button>
+                    <button type="submit" disabled={isSaving} className="bg-[#8C1E1E] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#7a1a1a] transition-colors disabled:bg-gray-400">
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
                     {status && <p className="text-green-600 font-semibold text-sm">{status}</p>}
                 </div>
             </div>

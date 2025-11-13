@@ -45,20 +45,29 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ isModal, onSelect }) => {
 
         setUploading(true);
         setError(null);
-
-        for (const file of Array.from(selectedFiles)) {
-             const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
-             const { error: uploadError } = await supabase.storage
+        
+        const uploadPromises = Array.from(selectedFiles).map(async (file) => {
+            const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+            const { error } = await supabase.storage
                 .from(BUCKET_NAME)
                 .upload(fileName, file);
             
-            if (uploadError) {
-                console.error('Error uploading file:', uploadError);
-                setError(`Upload failed: ${uploadError.message}. Make sure the bucket's max file size is large enough.`);
+            if (error) {
+                console.error(`Error uploading ${file.name}:`, error);
+                return `'${file.name}': ${error.message}`;
             }
+            return null;
+        });
+
+        const results = await Promise.all(uploadPromises);
+        const uploadErrors = results.filter((result): result is string => result !== null);
+
+        setUploading(false);
+
+        if (uploadErrors.length > 0) {
+            setError(`Upload failed for ${uploadErrors.length} file(s). Error(s): ${uploadErrors.join('; ')}. This is often due to missing Storage policies in Supabase (for row-level security) or exceeding the bucket's file size limit. Please ensure authenticated users have 'insert' permissions on the '${BUCKET_NAME}' bucket.`);
         }
         
-        setUploading(false);
         fetchFiles(); // Refresh the list
     };
 
