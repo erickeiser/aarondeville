@@ -1,5 +1,4 @@
 
-
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { SiteContent, Section, SectionType, ContactContent } from '../types';
 import { supabase } from '../lib/supabaseClient';
@@ -90,7 +89,7 @@ const defaultSections: { [key in SectionType]: () => Omit<Section, 'id'> } = {
         subheading: { line1: "Ready to start your fitness journey? Have questions about training? I'm here to help.", line2: 'Send me a message or give me a call.'},
         connect: { title: "Let's Connect", paragraph: "I'm passionate about helping you achieve your fitness goals. Whether you're ready to get started or just have questions, I'd love to hear from you." },
         details: {
-          email: { address: 'alex@fitprotrainer.com', note: 'I typically respond within 2-4 hours' },
+          email: { address: 'aarondeville@yahoo.com', note: 'I typically respond within 2-4 hours' },
           phone: { number: '(555) 123-4567', note: 'Call or text for immediate assistance' },
           location: { name: 'Downtown Fitness Center', address: '123 Main Street, City State 12345', note: 'Also available for home/virtual sessions' },
           availability: ['Monday - Friday: 6:00 AM – 8:00 PM', 'Saturday: 7:00 AM – 6:00 PM', 'Sunday: 8:00 AM – 4:00 PM'],
@@ -106,7 +105,7 @@ const defaultSections: { [key in SectionType]: () => Omit<Section, 'id'> } = {
           messagePlaceholder: 'Tell me about your fitness goals, questions, or how I can help you...',
           buttonText: 'Send Message',
         },
-        notificationEmail: 'changeme@example.com',
+        notificationEmail: 'aarondeville@yahoo.com',
     }}),
     video: () => ({ type: 'video', content: {
         headline: 'Featured Video',

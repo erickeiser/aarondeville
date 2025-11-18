@@ -1,7 +1,4 @@
 
-
-
-
 import React, { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabaseClient';
@@ -20,13 +17,14 @@ import MediaLibraryModal from './MediaLibraryModal';
 import PageStructure from './PageStructure';
 import VideoForm from './forms/VideoForm';
 import ContactSubmissions from './ContactSubmissions';
+import IntakeSubmissions from './IntakeSubmissions';
 import { useContent } from '../../hooks/useContent';
 import WriteSuccessStoryForm from './forms/WriteSuccessStoryForm';
 import ConsultationForm from './forms/ConsultationForm';
 import IntakeFormForm from './forms/IntakeFormForm';
 
 type ActiveView = 
-  | { type: 'general' | 'footer' | 'media' | 'pageStructure' | 'submissions' }
+  | { type: 'general' | 'footer' | 'media' | 'pageStructure' | 'submissions' | 'intakeSubmissions' }
   | { type: 'section', id: string };
 
 const componentFormMap: { [key: string]: React.ComponentType<any> } = {
@@ -93,6 +91,7 @@ const Admin: React.FC = () => {
       case 'media': return <MediaLibrary isModal={false} />;
       case 'pageStructure': return <PageStructure />;
       case 'submissions': return <ContactSubmissions />;
+      case 'intakeSubmissions': return <IntakeSubmissions />;
       case 'section':
         const section = content.sections.find(s => s.id === activeView.id);
         if (!section) return <div>Section not found</div>;
@@ -140,6 +139,5 @@ const Admin: React.FC = () => {
     </div>
   );
 };
-// Helper hook to avoid prop-drilling within Admin component.
-// Note: This is a simplified hook, and a more complex app might use a different pattern.
+
 export default Admin;

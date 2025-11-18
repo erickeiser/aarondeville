@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { ConsultationContent } from '../types';
 
@@ -9,6 +8,19 @@ interface ConsultationProps {
 }
 
 const Consultation: React.FC<ConsultationProps> = ({ content: consultationContent, id }) => {
+  
+  const handleConsultationClick = () => {
+    // Dispatch event to notify IntakeForm to pre-select "Consultation" or "Free Consultation" if available
+    const event = new CustomEvent('serviceSelected', { detail: 'Free Consultation' });
+    window.dispatchEvent(event);
+
+    // Scroll to IntakeForm
+    const intakeSection = document.getElementById('intakeForm');
+    if (intakeSection) {
+      intakeSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section id={id} className="bg-[#E8E6DC] pb-20 md:pb-28">
       <div className="container mx-auto px-6">
@@ -17,9 +29,12 @@ const Consultation: React.FC<ConsultationProps> = ({ content: consultationConten
           <p className="mt-4 max-w-xl mx-auto">
             {consultationContent.subheading}
           </p>
-          <a href="#contact" className="mt-8 inline-block bg-[#E8E6DC] text-[#8C1E1E] px-8 py-3 rounded-lg font-semibold hover:bg-[#d9d7ce] transition-colors">
+          <button 
+            onClick={handleConsultationClick}
+            className="mt-8 inline-block bg-[#E8E6DC] text-[#8C1E1E] px-8 py-3 rounded-lg font-semibold hover:bg-[#d9d7ce] transition-colors"
+          >
             {consultationContent.buttonText}
-          </a>
+          </button>
         </div>
       </div>
     </section>

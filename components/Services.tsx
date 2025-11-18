@@ -1,10 +1,8 @@
-
-
 import React from 'react';
 import { CheckIcon } from './Icons';
 import { ServicesContent } from '../types';
 
-const ServiceCard: React.FC<{ plan: any }> = ({ plan }) => {
+const ServiceCard: React.FC<{ plan: any, onGetStarted: (title: string) => void }> = ({ plan, onGetStarted }) => {
   const isPopular = plan.popular;
   return (
     <div className={`rounded-xl p-8 flex flex-col h-full ${isPopular ? 'bg-[#1A1A1A] text-[#E8E6DC] border-4 border-[#8C1E1E] relative pt-12' : 'bg-[#3C4452] text-[#E8E6DC]'}`}>
@@ -24,7 +22,10 @@ const ServiceCard: React.FC<{ plan: any }> = ({ plan }) => {
           </li>
         ))}
       </ul>
-      <button className={`w-full py-3 rounded-lg font-semibold transition-colors mt-auto ${isPopular ? 'bg-[#8C1E1E] text-[#E8E6DC] hover:bg-[#7a1a1a]' : 'bg-[#1A1A1A] text-[#E8E6DC] hover:bg-black'}`}>
+      <button 
+        onClick={() => onGetStarted(plan.title)}
+        className={`w-full py-3 rounded-lg font-semibold transition-colors mt-auto ${isPopular ? 'bg-[#8C1E1E] text-[#E8E6DC] hover:bg-[#7a1a1a]' : 'bg-[#1A1A1A] text-[#E8E6DC] hover:bg-black'}`}
+      >
         Get Started
       </button>
     </div>
@@ -37,6 +38,23 @@ interface ServicesProps {
 }
 
 const Services: React.FC<ServicesProps> = ({ content: servicesContent, id }) => {
+  
+  const handleGetStarted = (title: string) => {
+    // Dispatch event to notify IntakeForm
+    const event = new CustomEvent('serviceSelected', { detail: title });
+    window.dispatchEvent(event);
+
+    // Scroll to IntakeForm
+    const intakeSection = document.getElementById('intakeForm');
+    if (intakeSection) {
+      intakeSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Fallback if ID casing is different or section is missing
+       const altIntake = document.querySelector('section[id*="intake"]');
+       if(altIntake) altIntake.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section id={id} className="py-20 md:py-28 bg-[#E8E6DC]">
       <div className="container mx-auto px-6 text-center">
@@ -46,7 +64,7 @@ const Services: React.FC<ServicesProps> = ({ content: servicesContent, id }) => 
         </p>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12 text-left">
           {servicesContent.plans.map((plan, index) => (
-            <ServiceCard key={index} plan={plan} />
+            <ServiceCard key={index} plan={plan} onGetStarted={handleGetStarted} />
           ))}
         </div>
       </div>
