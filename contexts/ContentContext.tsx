@@ -83,6 +83,50 @@ const defaultSections: { [key in SectionType]: () => Omit<Section, 'id'> } = {
     intakeForm: () => ({ type: 'intakeForm', content: {
         headline: 'Start Your Fitness Journey',
         subheading: 'Complete this intake form to help me understand your goals and create a personalized training plan just for you.',
+        submitButtonText: 'Submit Intake Form',
+        disclaimer: 'By submitting this form, you agree to receive communications about your fitness journey. Your information is kept confidential.',
+        sections: [
+            {
+                id: 'personal',
+                title: 'Personal Information',
+                icon: 'UserCircleIcon',
+                fields: [
+                    { id: 'first_name', label: 'First Name', type: 'text', required: true, width: 'half', placeholder: '' },
+                    { id: 'last_name', label: 'Last Name', type: 'text', required: true, width: 'half', placeholder: '' },
+                    { id: 'email', label: 'Email Address', type: 'email', required: true, width: 'half', placeholder: '' },
+                    { id: 'phone', label: 'Phone Number', type: 'tel', required: true, width: 'half', placeholder: '' },
+                    { id: 'age', label: 'Age', type: 'number', required: true, width: 'half', placeholder: '' },
+                    { id: 'fitness_level', label: 'Current Fitness Level', type: 'select', required: true, width: 'half', options: ['Select fitness level', 'Beginner', 'Intermediate', 'Advanced'] },
+                ]
+            },
+            {
+                id: 'goals',
+                title: 'Goals & Health Information',
+                icon: 'TargetIcon',
+                fields: [
+                    { id: 'goals', label: 'Primary Fitness Goals', type: 'textarea', required: true, width: 'full', placeholder: 'e.g., lose weight, build muscle, improve endurance, get stronger...' },
+                    { id: 'injuries', label: 'Injuries or Physical Limitations', type: 'textarea', required: false, width: 'full', placeholder: 'Please describe any injuries, pain, or physical limitations I should know about...' },
+                ]
+            },
+             {
+                id: 'availability',
+                title: 'Availability & Preferences',
+                icon: 'CalendarIcon',
+                fields: [
+                    { id: 'availability', label: 'When are you typically available? (Select all that apply)', type: 'checkbox-group', required: false, width: 'full', options: ['Early Morning (6-9 AM)', 'Morning (9-12 PM)', 'Afternoon (12-5 PM)', 'Evening (5-8 PM)', 'Weekends Only', 'Flexible Schedule'] },
+                    { id: 'preferred_service', label: 'Preferred Service', type: 'select', required: true, width: 'half', options: ['Select preferred service', 'Personal Training', 'Group Training', 'Virtual Training', 'Nutrition Coaching', 'Free Consultation'] },
+                    { id: 'budget', label: 'Monthly Budget Range', type: 'select', required: false, width: 'half', options: ['Select budget range', '$200 - $400', '$400 - $600', '$600+'] },
+                ]
+            },
+            {
+                id: 'additional',
+                title: 'Additional Information',
+                icon: 'PaperAirplaneIcon',
+                fields: [
+                    { id: 'additional_info', label: 'Anything else?', type: 'textarea', required: false, width: 'full', placeholder: 'Questions about training? Special considerations?' },
+                ]
+            }
+        ]
     }}),
     contact: () => ({ type: 'contact', content: {
         headline: 'Get In Touch',
@@ -213,6 +257,14 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (!Array.isArray(fetchedContent.sections)) {
             fetchedContent.sections = defaultContent.sections;
         }
+        // Migration check for IntakeForm: if it lacks 'sections', merge defaults
+        fetchedContent.sections = fetchedContent.sections.map(section => {
+            if (section.type === 'intakeForm' && !('sections' in section.content)) {
+                return { ...section, content: { ...section.content, ...defaultSections.intakeForm().content } };
+            }
+            return section;
+        });
+
         setContentState(fetchedContent);
         if (data.updated_at) {
           setUpdatedAt(data.updated_at);

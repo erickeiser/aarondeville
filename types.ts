@@ -70,9 +70,29 @@ export interface WriteSuccessStoryContent {
   imageUrl: string;
 }
 
+export interface IntakeFormField {
+    id: string; // Maps to DB column name
+    label: string;
+    type: 'text' | 'number' | 'email' | 'tel' | 'textarea' | 'select' | 'checkbox-group';
+    placeholder?: string;
+    required: boolean;
+    width: 'full' | 'half';
+    options?: string[]; // For select and checkbox-group
+}
+
+export interface IntakeFormSection {
+    id: string;
+    title: string;
+    icon: string; // Icon name from Icons.tsx
+    fields: IntakeFormField[];
+}
+
 export interface IntakeFormContent {
   headline: string;
   subheading: string;
+  sections: IntakeFormSection[];
+  submitButtonText: string;
+  disclaimer: string;
 }
 
 export interface ContactContent {
