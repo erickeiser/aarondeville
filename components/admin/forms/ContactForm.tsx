@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useContent } from '../../../hooks/useContent';
 import { Input, Textarea, FormCard } from './FormElements';
@@ -75,6 +73,19 @@ const ContactForm: React.FC<ContactFormProps> = ({ sectionId }) => {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800">Edit Contact Section</h2>
+
+            <FormCard title="Settings">
+                <Input 
+                    label="Notification Email Address" 
+                    id="notificationEmail" 
+                    value={formData.notificationEmail || ''} 
+                    onChange={e => setFormData(p => p ? ({...p, notificationEmail: e.target.value}) : undefined)} 
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                    When a user submits the contact form, an email will be sent to this address via FormSubmit.co. 
+                    Note: You will need to confirm your email address the first time a submission is made.
+                </p>
+            </FormCard>
 
             <FormCard title="Main Titles & Subheadings" onReset={handleReset}>
                 <Input label="Headline" id="headline" value={formData.headline} onChange={e => setFormData(p => p ? ({...p, headline: e.target.value}) : undefined)} />

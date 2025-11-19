@@ -138,6 +138,17 @@ const IntakeFormForm: React.FC<IntakeFormFormProps> = ({ sectionId }) => {
             <h2 className="text-2xl font-bold text-gray-800">Edit Intake Form</h2>
             
             <FormCard title="Main Settings" onReset={handleReset}>
+                <Input 
+                    label="Notification Email Address" 
+                    id="notificationEmail" 
+                    value={formData.notificationEmail || ''} 
+                    onChange={e => handleInputChange('notificationEmail', e.target.value)} 
+                />
+                <p className="text-xs text-gray-500 mb-4">
+                    When a user submits the form, an email will be sent to this address via FormSubmit.co. 
+                    Note: You will need to confirm your email address the first time a submission is made.
+                </p>
+
                 <Input label="Headline" id="headline" value={formData.headline} onChange={e => handleInputChange('headline', e.target.value)} />
                 <Textarea label="Subheading" id="subheading" value={formData.subheading} onChange={e => handleInputChange('subheading', e.target.value)} />
                 <Input label="Submit Button Text" id="submitBtn" value={formData.submitButtonText} onChange={e => handleInputChange('submitButtonText', e.target.value)} />

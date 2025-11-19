@@ -96,10 +96,29 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ content: formContent, id }) => 
       setErrorMessage('');
 
       try {
-          // The formData keys match the DB columns because we configured them that way in defaultContent
+          // 1. Save to Supabase
           const { error } = await supabase.from('intake_submissions').insert([formData]);
 
           if (error) throw error;
+
+          // 2. Send Email Notification (Frontend-only via FormSubmit)
+          const notificationEmail = formContent.notificationEmail || 'aarondeville@yahoo.com';
+          try {
+               await fetch(`https://formsubmit.co/ajax/${notificationEmail}`, {
+                  method: 'POST',
+                  headers: { 
+                      'Content-Type': 'application/json',
+                      'Accept': 'application/json'
+                  },
+                  body: JSON.stringify({
+                      _subject: `New Intake Form: ${formData.first_name} ${formData.last_name}`,
+                      _template: 'table',
+                      ...formData
+                  })
+              });
+          } catch (emailErr) {
+              console.warn("Email notification failed to send (DB saved successfully):", emailErr);
+          }
 
           setStatus('success');
           setFormData(initialFormData); // Reset form
@@ -131,7 +150,6 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ content: formContent, id }) => 
                      if (str !== '{}' && str !== '[]') {
                         msg = `Error: ${str}`;
                      } else {
-                        // If JSON.stringify is empty (common with native Error objects), try toString
                          msg = error.toString();
                      }
                 } catch (e) {

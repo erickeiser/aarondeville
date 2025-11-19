@@ -1,9 +1,10 @@
 
 
 import React, { useState } from 'react';
-import { MailIcon, PhoneIcon, LocationMarkerIcon, ClockIcon, PaperAirplaneIcon } from './Icons';
+import { MailIcon, PhoneIcon, LocationMarkerIcon, ClockIcon, PaperAirplaneIcon, ChatAltIcon } from './Icons';
 import { ContactContent } from '../types';
 import { supabase } from '../lib/supabaseClient';
+import Chatbot from './Chatbot';
 
 interface ContactProps {
   content: ContactContent;
@@ -14,6 +15,7 @@ const Contact: React.FC<ContactProps> = ({ content: contactContent, id }) => {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [activeTab, setActiveTab] = useState<'email' | 'chat'>('email');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -32,15 +34,39 @@ const Contact: React.FC<ContactProps> = ({ content: contactContent, id }) => {
     setStatus('loading');
     setErrorMessage('');
 
+    // 1. Save to Database
     const { error } = await supabase.from('contact_submissions').insert([
         { name: formData.name, email: formData.email, subject: formData.subject, message: formData.message }
     ]);
 
     if (error) {
         console.error('Error submitting form:', error);
-        setErrorMessage('There was an error sending your message. Please try again.');
+        setErrorMessage('There was an error saving your message. Please try again.');
         setStatus('error');
     } else {
+        // 2. Send Email Notification (Frontend-only via FormSubmit)
+        const notificationEmail = contactContent.notificationEmail || 'aarondeville@yahoo.com';
+        
+        try {
+             await fetch(`https://formsubmit.co/ajax/${notificationEmail}`, {
+                method: 'POST',
+                headers: { 
+                      'Content-Type': 'application/json',
+                      'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    _subject: `New Contact Message: ${formData.subject}`,
+                    _template: 'table',
+                    name: formData.name,
+                    email: formData.email,
+                    subject: formData.subject,
+                    message: formData.message
+                })
+            });
+        } catch (emailErr) {
+            console.warn("Email notification failed to send (DB saved successfully):", emailErr);
+        }
+
         setStatus('success');
         setFormData({ name: '', email: '', subject: '', message: '' }); // Clear form
     }
@@ -108,35 +134,66 @@ const Contact: React.FC<ContactProps> = ({ content: contactContent, id }) => {
                     <p className="text-[#E8E6DC]/70 mt-2 text-sm">{contactContent.guarantee.text}</p>
                 </div>
             </div>
-            <div className="bg-[#333333] p-8 rounded-lg">
-                <h3 className="text-2xl font-bold mb-6">{contactContent.form.title}</h3>
-                <form className="space-y-6" onSubmit={handleSubmit}>
-                    <div>
-                        <Label htmlFor="contactName">{contactContent.form.nameLabel}</Label>
-                        <input type="text" id="contactName" value={formData.name} onChange={handleInputChange} className="w-full bg-[#333333] border border-gray-600 rounded-md px-3 py-2 text-[#E8E6DC] focus:ring-[#8C1E1E] focus:border-[#8C1E1E]" />
-                    </div>
-                    <div>
-                        <Label htmlFor="contactEmail">{contactContent.form.emailLabel}</Label>
-                        <input type="email" id="contactEmail" value={formData.email} onChange={handleInputChange} className="w-full bg-[#333333] border border-gray-600 rounded-md px-3 py-2 text-[#E8E6DC] focus:ring-[#8C1E1E] focus:border-[#8C1E1E]" />
-                    </div>
-                    <div>
-                        <Label htmlFor="contactSubject">{contactContent.form.subjectLabel}</Label>
-                        <input type="text" id="contactSubject" value={formData.subject} onChange={handleInputChange} className="w-full bg-[#333333] border border-gray-600 rounded-md px-3 py-2 text-[#E8E6DC] focus:ring-[#8C1E1E] focus:border-[#8C1E1E]" placeholder={contactContent.form.subjectPlaceholder}/>
-                    </div>
-                    <div>
-                        <Label htmlFor="contactMessage">{contactContent.form.messageLabel}</Label>
-                        <textarea id="contactMessage" value={formData.message} onChange={handleInputChange} rows={5} className="w-full bg-[#333333] border border-gray-600 rounded-md px-3 py-2 text-[#E8E6DC] focus:ring-[#8C1E1E] focus:border-[#8C1E1E]" placeholder={contactContent.form.messagePlaceholder}></textarea>
-                    </div>
-                     <div className="h-10">
-                        {status === 'success' && <p className="text-green-400 text-center">Message sent successfully! We'll be in touch soon.</p>}
-                        {status === 'error' && <p className="text-red-400 text-center">{errorMessage}</p>}
-                    </div>
-                    <div>
-                         <button type="submit" disabled={status === 'loading'} className="w-full bg-[#8C1E1E] text-[#E8E6DC] px-8 py-3 rounded-lg font-semibold hover:bg-[#7a1a1a] transition-colors inline-flex items-center justify-center gap-2 disabled:bg-[#8C1E1E]/50 disabled:cursor-not-allowed">
-                            {status === 'loading' ? 'Sending...' : contactContent.form.buttonText} <PaperAirplaneIcon className="h-5 w-5"/>
-                        </button>
-                    </div>
-                </form>
+
+            <div className="bg-[#333333] p-8 rounded-lg shadow-xl">
+                {/* Tabs */}
+                <div className="flex p-1 bg-[#1A1A1A] rounded-lg mb-8">
+                    <button
+                        onClick={() => setActiveTab('email')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-semibold transition-all ${
+                            activeTab === 'email' 
+                                ? 'bg-[#8C1E1E] text-[#E8E6DC] shadow-lg' 
+                                : 'text-[#E8E6DC]/60 hover:text-[#E8E6DC]'
+                        }`}
+                    >
+                        <MailIcon className="h-4 w-4" /> Send Message
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('chat')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-semibold transition-all ${
+                            activeTab === 'chat' 
+                                ? 'bg-[#8C1E1E] text-[#E8E6DC] shadow-lg' 
+                                : 'text-[#E8E6DC]/60 hover:text-[#E8E6DC]'
+                        }`}
+                    >
+                        <ChatAltIcon className="h-4 w-4" /> Chat with AI
+                    </button>
+                </div>
+
+                {activeTab === 'email' ? (
+                    <>
+                        <h3 className="text-2xl font-bold mb-6">{contactContent.form.title}</h3>
+                        <form className="space-y-6" onSubmit={handleSubmit}>
+                            <div>
+                                <Label htmlFor="contactName">{contactContent.form.nameLabel}</Label>
+                                <input type="text" id="contactName" value={formData.name} onChange={handleInputChange} className="w-full bg-[#333333] border border-gray-600 rounded-md px-3 py-2 text-[#E8E6DC] focus:ring-[#8C1E1E] focus:border-[#8C1E1E]" />
+                            </div>
+                            <div>
+                                <Label htmlFor="contactEmail">{contactContent.form.emailLabel}</Label>
+                                <input type="email" id="contactEmail" value={formData.email} onChange={handleInputChange} className="w-full bg-[#333333] border border-gray-600 rounded-md px-3 py-2 text-[#E8E6DC] focus:ring-[#8C1E1E] focus:border-[#8C1E1E]" />
+                            </div>
+                            <div>
+                                <Label htmlFor="contactSubject">{contactContent.form.subjectLabel}</Label>
+                                <input type="text" id="contactSubject" value={formData.subject} onChange={handleInputChange} className="w-full bg-[#333333] border border-gray-600 rounded-md px-3 py-2 text-[#E8E6DC] focus:ring-[#8C1E1E] focus:border-[#8C1E1E]" placeholder={contactContent.form.subjectPlaceholder}/>
+                            </div>
+                            <div>
+                                <Label htmlFor="contactMessage">{contactContent.form.messageLabel}</Label>
+                                <textarea id="contactMessage" value={formData.message} onChange={handleInputChange} rows={5} className="w-full bg-[#333333] border border-gray-600 rounded-md px-3 py-2 text-[#E8E6DC] focus:ring-[#8C1E1E] focus:border-[#8C1E1E]" placeholder={contactContent.form.messagePlaceholder}></textarea>
+                            </div>
+                            <div className="h-10">
+                                {status === 'success' && <p className="text-green-400 text-center">Message sent successfully! We'll be in touch soon.</p>}
+                                {status === 'error' && <p className="text-red-400 text-center">{errorMessage}</p>}
+                            </div>
+                            <div>
+                                <button type="submit" disabled={status === 'loading'} className="w-full bg-[#8C1E1E] text-[#E8E6DC] px-8 py-3 rounded-lg font-semibold hover:bg-[#7a1a1a] transition-colors inline-flex items-center justify-center gap-2 disabled:bg-[#8C1E1E]/50 disabled:cursor-not-allowed">
+                                    {status === 'loading' ? 'Sending...' : contactContent.form.buttonText} <PaperAirplaneIcon className="h-5 w-5"/>
+                                </button>
+                            </div>
+                        </form>
+                    </>
+                ) : (
+                    <Chatbot />
+                )}
             </div>
         </div>
       </div>

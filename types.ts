@@ -93,6 +93,7 @@ export interface IntakeFormContent {
   sections: IntakeFormSection[];
   submitButtonText: string;
   disclaimer: string;
+  notificationEmail?: string;
 }
 
 export interface ContactContent {

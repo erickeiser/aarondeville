@@ -85,6 +85,7 @@ const defaultSections: { [key in SectionType]: () => Omit<Section, 'id'> } = {
         subheading: 'Complete this intake form to help me understand your goals and create a personalized training plan just for you.',
         submitButtonText: 'Submit Intake Form',
         disclaimer: 'By submitting this form, you agree to receive communications about your fitness journey. Your information is kept confidential.',
+        notificationEmail: 'aarondeville@yahoo.com',
         sections: [
             {
                 id: 'personal',
