@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, Chat } from "@google/genai";
 import { useContent } from '../hooks/useContent';
-import { PaperAirplaneIcon, SparklesIcon } from './Icons';
+import { PaperAirplaneIcon, SparklesIcon, CogIcon } from './Icons';
 import { AboutContent, ServicesContent, ContactContent } from '../types';
 
 const Chatbot: React.FC = () => {
@@ -12,15 +12,42 @@ const Chatbot: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKeyReady, setApiKeyReady] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatSessionRef = useRef<Chat | null>(null);
 
-  // Initialize Gemini Chat Session
+  // Check for API Key on mount
   useEffect(() => {
+    const checkKey = async () => {
+      try {
+        const aistudio = (window as any).aistudio;
+        if (aistudio && aistudio.hasSelectedApiKey) {
+          const hasKey = await aistudio.hasSelectedApiKey();
+          if (hasKey) {
+            setApiKeyReady(true);
+          }
+        } else {
+          // Fallback for environments where process.env is already populated
+          if (process.env.API_KEY) {
+            setApiKeyReady(true);
+          }
+        }
+      } catch (e) {
+        console.error("Error checking API key:", e);
+      }
+    };
+    checkKey();
+  }, []);
+
+  // Initialize Gemini Chat Session when API Key is ready
+  useEffect(() => {
+    if (!apiKeyReady) return;
+
     const initChat = async () => {
       const apiKey = process.env.API_KEY;
       if (!apiKey) {
-        console.error("API_KEY is missing in environment variables.");
+        console.error("API_KEY is missing despite check.");
         return;
       }
 
@@ -65,21 +92,38 @@ const Chatbot: React.FC = () => {
         - Always be polite and professional.
       `;
 
-      chatSessionRef.current = ai.chats.create({
-        model: 'gemini-3-pro-preview',
-        config: {
-          systemInstruction,
-        },
-      });
+      try {
+        chatSessionRef.current = ai.chats.create({
+          model: 'gemini-3-pro-preview',
+          config: {
+            systemInstruction,
+          },
+        });
+      } catch (error) {
+        console.error("Failed to create chat session:", error);
+      }
     };
 
     initChat();
-  }, [content]);
+  }, [content, apiKeyReady]);
 
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const handleEnableKey = async () => {
+    try {
+      const aistudio = (window as any).aistudio;
+      if (aistudio) {
+        await aistudio.openSelectKey();
+        // Race condition mitigation: assume success after opening dialog
+        setApiKeyReady(true);
+      }
+    } catch (e) {
+      console.error("Error opening key selector:", e);
+    }
+  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,20 +152,52 @@ const Chatbot: React.FC = () => {
           return newMessages;
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending message:", error);
-      setMessages(prev => [...prev, { role: 'model', text: "I'm sorry, I'm having trouble connecting right now. Please try again later or use the contact form." }]);
+      
+      // Handle "Requested entity was not found" (Invalid Key)
+      if (error.message && error.message.includes("Requested entity was not found")) {
+          setApiKeyReady(false); // Reset state to force re-selection
+          setMessages(prev => [...prev, { role: 'model', text: "It looks like there's an issue with the API Key. Please re-select your key." }]);
+      } else {
+          setMessages(prev => [...prev, { role: 'model', text: "I'm sorry, I'm having trouble connecting right now. Please try again later or use the contact form." }]);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (!apiKeyReady) {
+      return (
+        <div className="h-[500px] flex flex-col items-center justify-center bg-[#2B2B2B] rounded-lg border border-gray-700 text-center p-6">
+            <div className="bg-[#1A1A1A] p-4 rounded-full mb-4">
+                <SparklesIcon className="h-10 w-10 text-[#8C1E1E]" />
+            </div>
+            <h3 className="text-[#E8E6DC] font-bold text-xl mb-2">Enable AI Assistant</h3>
+            <p className="text-[#E8E6DC]/70 mb-8 text-sm max-w-xs">
+                To chat with the AI assistant, you need to connect your Google API Key.
+            </p>
+            <button 
+                onClick={handleEnableKey}
+                className="bg-[#8C1E1E] text-[#E8E6DC] px-6 py-3 rounded-lg font-semibold hover:bg-[#7a1a1a] transition-colors flex items-center gap-2 shadow-lg"
+            >
+                <CogIcon className="h-5 w-5" /> Connect API Key
+            </button>
+             <div className="mt-6 text-xs text-gray-500">
+                <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="underline hover:text-[#E8E6DC] transition-colors">
+                    Billing Information
+                </a>
+            </div>
+        </div>
+      );
+  }
 
   return (
     <div className="flex flex-col h-[500px]">
       <div className="flex-grow overflow-y-auto space-y-4 p-4 bg-[#2B2B2B] rounded-lg border border-gray-700 scrollbar-thin scrollbar-thumb-gray-600">
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] p-3 rounded-lg text-sm ${
+            <div className={`max-w-[85%] p-3 rounded-lg text-sm ${
               msg.role === 'user' 
                 ? 'bg-[#8C1E1E] text-[#E8E6DC] rounded-br-none' 
                 : 'bg-[#1A1A1A] text-[#E8E6DC] rounded-bl-none border border-gray-700'
