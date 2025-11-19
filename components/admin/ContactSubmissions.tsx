@@ -28,17 +28,22 @@ create table if not exists public.contact_submissions (
 -- 2. Enable Row Level Security
 alter table public.contact_submissions enable row level security;
 
--- 3. Allow public access to insert data
+-- 3. Drop existing policies to avoid "policy already exists" errors
+drop policy if exists "Enable insert for all users" on public.contact_submissions;
+drop policy if exists "Enable read access for authenticated users only" on public.contact_submissions;
+drop policy if exists "Enable delete for authenticated users only" on public.contact_submissions;
+
+-- 4. Allow public access to insert data
 create policy "Enable insert for all users" 
 on public.contact_submissions for insert 
 with check (true);
 
--- 4. Allow authenticated users (admin) to view data
+-- 5. Allow authenticated users (admin) to view data
 create policy "Enable read access for authenticated users only" 
 on public.contact_submissions for select 
 using (auth.role() = 'authenticated');
 
--- 5. Allow authenticated users (admin) to delete data
+-- 6. Allow authenticated users (admin) to delete data
 create policy "Enable delete for authenticated users only" 
 on public.contact_submissions for delete 
 using (auth.role() = 'authenticated');

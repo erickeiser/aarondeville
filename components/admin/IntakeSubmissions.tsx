@@ -44,17 +44,22 @@ create table if not exists public.intake_submissions (
 -- 2. Enable Row Level Security
 alter table public.intake_submissions enable row level security;
 
--- 3. Allow public access to insert data (for the public form)
+-- 3. Drop existing policies to avoid "policy already exists" errors
+drop policy if exists "Enable insert for all users" on public.intake_submissions;
+drop policy if exists "Enable read access for authenticated users only" on public.intake_submissions;
+drop policy if exists "Enable delete for authenticated users only" on public.intake_submissions;
+
+-- 4. Allow public access to insert data (for the public form)
 create policy "Enable insert for all users" 
 on public.intake_submissions for insert 
 with check (true);
 
--- 4. Allow authenticated users (admin) to view data
+-- 5. Allow authenticated users (admin) to view data
 create policy "Enable read access for authenticated users only" 
 on public.intake_submissions for select 
 using (auth.role() = 'authenticated');
 
--- 5. Allow authenticated users (admin) to delete data
+-- 6. Allow authenticated users (admin) to delete data
 create policy "Enable delete for authenticated users only" 
 on public.intake_submissions for delete 
 using (auth.role() = 'authenticated');
