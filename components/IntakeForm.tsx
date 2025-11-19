@@ -115,6 +115,9 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ content: formContent, id }) => 
                 msg = 'System Configuration Error: The database table is missing. Administrator: Check Admin > Intake Forms for setup instructions.';
             } else if (error.code === '42703') {
                 msg = 'System Configuration Error: Form fields do not match database columns. Please check the Admin Panel configuration.';
+            } else if (error.code === '23502') {
+                const colName = error.message?.match(/"(.*?)"/)?.[1] || 'unknown';
+                msg = `Database Configuration Error: The database requires a value for column "${colName}" but it wasn't sent. Please run the Database Setup SQL in the Admin Panel.`;
             } else if (error.message) {
                 msg = error.message;
             } else if (error.error_description) {

@@ -29,7 +29,10 @@ create table if not exists public.intake_submissions (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 2. Add columns if they are missing (This fixes the "Could not find column" error)
+-- 2. FIX: Remove potential conflicting 'data' column from previous setups
+alter table public.intake_submissions drop column if exists data;
+
+-- 3. Add columns if they are missing (This fixes the "Could not find column" error)
 alter table public.intake_submissions add column if not exists first_name text;
 alter table public.intake_submissions add column if not exists last_name text;
 alter table public.intake_submissions add column if not exists email text;
@@ -43,10 +46,10 @@ alter table public.intake_submissions add column if not exists preferred_service
 alter table public.intake_submissions add column if not exists budget text;
 alter table public.intake_submissions add column if not exists additional_info text;
 
--- 3. Enable Row Level Security
+-- 4. Enable Row Level Security
 alter table public.intake_submissions enable row level security;
 
--- 4. Update Policies (Drop first to avoid errors)
+-- 5. Update Policies (Drop first to avoid errors)
 drop policy if exists "Enable insert for all users" on public.intake_submissions;
 drop policy if exists "Enable read access for authenticated users only" on public.intake_submissions;
 drop policy if exists "Enable delete for authenticated users only" on public.intake_submissions;
@@ -63,7 +66,7 @@ create policy "Enable delete for authenticated users only"
 on public.intake_submissions for delete 
 using (auth.role() = 'authenticated');
 
--- 5. Refresh the schema cache
+-- 6. Refresh the schema cache
 notify pgrst, 'reload config';
 `;
 
@@ -149,7 +152,7 @@ const IntakeSubmissions: React.FC = () => {
                                     Database Schema Issue Detected
                                 </h3>
                                 <div className="mt-2 text-sm leading-5 text-yellow-700">
-                                    <p>The <code>intake_submissions</code> table is missing or has missing columns (like 'availability'). Please run the SQL below to fix it.</p>
+                                    <p>The <code>intake_submissions</code> table structure needs an update. Please run the SQL below to fix it.</p>
                                 </div>
                             </div>
                         </div>
@@ -160,7 +163,7 @@ const IntakeSubmissions: React.FC = () => {
                     <h3 className="text-lg font-bold text-gray-800 mb-4">SQL Setup Instructions</h3>
                     <p className="mb-4 text-gray-600 text-sm">
                         To capture intake form submissions correctly, run the following SQL in your Supabase project. <br/>
-                        <strong>This script is safe to run even if you already have the table.</strong> It will simply add any missing columns.
+                        <strong>This script is safe to run even if you already have the table.</strong> It will remove conflicting columns and add missing ones.
                     </p>
                     <ol className="list-decimal list-inside mb-6 text-sm text-gray-700 space-y-2">
                         <li>Go to your <strong>Supabase Project Dashboard</strong>.</li>
