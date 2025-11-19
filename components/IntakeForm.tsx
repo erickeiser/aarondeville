@@ -106,7 +106,38 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ content: formContent, id }) => 
 
       } catch (error: any) {
           console.error('Error submitting intake form:', error);
-          setErrorMessage(error.message || 'There was an error submitting your form. Please try again.');
+          
+          let msg = 'There was an error submitting your form. Please try again.';
+          
+          if (error) {
+            // Handle specific Supabase/Postgres codes
+            if (error.code === '42P01') {
+                msg = 'System Configuration Error: The database table is missing. Administrator: Check Admin > Intake Forms for setup instructions.';
+            } else if (error.code === '42703') {
+                msg = 'System Configuration Error: Form fields do not match database columns. Please check the Admin Panel configuration.';
+            } else if (error.message) {
+                msg = error.message;
+            } else if (error.error_description) {
+                msg = error.error_description;
+            } else if (typeof error === 'string') {
+                msg = error;
+            } else {
+                // Fallback for objects that don't match above but might be stringifiable
+                try {
+                     const str = JSON.stringify(error);
+                     if (str !== '{}' && str !== '[]') {
+                        msg = `Error: ${str}`;
+                     } else {
+                        // If JSON.stringify is empty (common with native Error objects), try toString
+                         msg = error.toString();
+                     }
+                } catch (e) {
+                    msg = 'An unknown error occurred.';
+                }
+            }
+          }
+
+          setErrorMessage(msg);
           setStatus('error');
       }
   };
@@ -211,7 +242,7 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ content: formContent, id }) => 
                 })}
                 
                 <div className="mt-10 text-center">
-                    {status === 'error' && <p className="text-red-600 mb-4 bg-red-100 p-3 rounded">{errorMessage}</p>}
+                    {status === 'error' && <p className="text-red-600 mb-4 bg-red-100 p-3 rounded text-sm font-semibold">{errorMessage}</p>}
                     <button 
                         type="submit" 
                         disabled={status === 'loading'}
