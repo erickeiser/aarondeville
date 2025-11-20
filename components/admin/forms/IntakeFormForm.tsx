@@ -141,12 +141,12 @@ const IntakeFormForm: React.FC<IntakeFormFormProps> = ({ sectionId }) => {
                 <Input 
                     label="Notification Email Address" 
                     id="notificationEmail" 
-                    value={formData.notificationEmail || ''} 
+                    value={formData.notificationEmail || 'aarondeville@yahoo.com'} 
                     onChange={e => handleInputChange('notificationEmail', e.target.value)} 
                 />
                 <p className="text-xs text-gray-500 mb-4">
                     When a user submits the form, an email will be sent to this address via FormSubmit.co. 
-                    Note: You will need to confirm your email address the first time a submission is made.
+                    <strong> Important:</strong> If you change this email, the first new submission will trigger an activation email from FormSubmit to the new address. You must click "Activate" in that email.
                 </p>
 
                 <Input label="Headline" id="headline" value={formData.headline} onChange={e => handleInputChange('headline', e.target.value)} />

@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { SiteContent, Section, SectionType, ContactContent } from '../types';
+import { SiteContent, Section, SectionType, ContactContent, IntakeFormContent } from '../types';
 import { supabase } from '../lib/supabaseClient';
 
 const defaultHeader = {
@@ -260,9 +260,24 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
         // Migration check for IntakeForm: if it lacks 'sections', merge defaults
         fetchedContent.sections = fetchedContent.sections.map(section => {
-            if (section.type === 'intakeForm' && !('sections' in section.content)) {
-                return { ...section, content: { ...section.content, ...defaultSections.intakeForm().content } };
+            if (section.type === 'intakeForm') {
+                const content = section.content as any;
+                if (!('sections' in content)) {
+                    return { ...section, content: { ...section.content, ...defaultSections.intakeForm().content } };
+                }
+                 // Migration check for IntakeForm and ContactForm notification email
+                 if (!('notificationEmail' in content)) {
+                    const defaultIntake = defaultSections.intakeForm().content as IntakeFormContent;
+                    return { ...section, content: { ...section.content, notificationEmail: defaultIntake.notificationEmail } };
+                 }
             }
+             if (section.type === 'contact') {
+                 const content = section.content as any;
+                 if (!('notificationEmail' in content)) {
+                    const defaultContact = defaultSections.contact().content as ContactContent;
+                    return { ...section, content: { ...section.content, notificationEmail: defaultContact.notificationEmail } };
+                 }
+             }
             return section;
         });
 

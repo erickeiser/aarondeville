@@ -78,12 +78,12 @@ const ContactForm: React.FC<ContactFormProps> = ({ sectionId }) => {
                 <Input 
                     label="Notification Email Address" 
                     id="notificationEmail" 
-                    value={formData.notificationEmail || ''} 
+                    value={formData.notificationEmail || 'aarondeville@yahoo.com'} 
                     onChange={e => setFormData(p => p ? ({...p, notificationEmail: e.target.value}) : undefined)} 
                 />
                 <p className="text-xs text-gray-500 mt-1">
                     When a user submits the contact form, an email will be sent to this address via FormSubmit.co. 
-                    Note: You will need to confirm your email address the first time a submission is made.
+                    <strong> Important:</strong> If you change this email, the first new submission will trigger an activation email from FormSubmit to the new address. You must click "Activate" in that email.
                 </p>
             </FormCard>
 
