@@ -74,17 +74,35 @@ const ContactForm: React.FC<ContactFormProps> = ({ sectionId }) => {
         <form onSubmit={handleSubmit} className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800">Edit Contact Section</h2>
 
-            <FormCard title="Settings">
-                <Input 
-                    label="Notification Email Address" 
-                    id="notificationEmail" 
-                    value={formData.notificationEmail || 'aarondeville@yahoo.com'} 
-                    onChange={e => setFormData(p => p ? ({...p, notificationEmail: e.target.value}) : undefined)} 
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                    When a user submits the contact form, an email will be sent to this address via FormSubmit.co. 
-                    <strong> Important:</strong> If you change this email, the first new submission will trigger an activation email from FormSubmit to the new address. You must click "Activate" in that email.
-                </p>
+            <FormCard title="Email Notification Settings">
+                <div className="mb-4">
+                     <label className="block text-sm font-medium text-gray-700 mb-1">Web3Forms Access Key (Recommended)</label>
+                     <div className="flex gap-2">
+                        <input 
+                            type="text" 
+                            value={formData.formAccessKey || ''} 
+                            onChange={e => setFormData(p => p ? ({...p, formAccessKey: e.target.value}) : undefined)} 
+                            className="w-full border-gray-300 rounded-md shadow-sm focus:border-[#8C1E1E] focus:ring-[#8C1E1E] text-sm"
+                            placeholder="e.g. 842641a0-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                        />
+                     </div>
+                     <p className="text-xs text-gray-500 mt-1">
+                        For reliable email delivery, use Web3Forms. <a href="https://web3forms.com/" target="_blank" className="text-[#8C1E1E] underline font-bold">Get your free Access Key here</a>.
+                     </p>
+                </div>
+
+                <div className="border-t pt-4">
+                    <p className="text-xs font-bold text-gray-400 uppercase mb-2">Legacy Fallback</p>
+                    <Input 
+                        label="Notification Email Address" 
+                        id="notificationEmail" 
+                        value={formData.notificationEmail || 'aarondeville@yahoo.com'} 
+                        onChange={e => setFormData(p => p ? ({...p, notificationEmail: e.target.value}) : undefined)} 
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                        Used only if no Access Key is provided above. Uses FormSubmit.co (requires email activation).
+                    </p>
+                </div>
             </FormCard>
 
             <FormCard title="Main Titles & Subheadings" onReset={handleReset}>

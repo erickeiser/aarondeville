@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import { MailIcon, PhoneIcon, LocationMarkerIcon, ClockIcon, PaperAirplaneIcon, ChatAltIcon } from './Icons';
 import { ContactContent } from '../types';
@@ -44,25 +43,42 @@ const Contact: React.FC<ContactProps> = ({ content: contactContent, id }) => {
         setErrorMessage('There was an error saving your message. Please try again.');
         setStatus('error');
     } else {
-        // 2. Send Email Notification (Frontend-only via FormSubmit)
+        // 2. Send Email Notification
+        // Use Web3Forms if Access Key is present, otherwise fallback to FormSubmit
+        const accessKey = contactContent.formAccessKey;
         const notificationEmail = contactContent.notificationEmail || 'aarondeville@yahoo.com';
         
+        const endpoint = accessKey 
+            ? 'https://api.web3forms.com/submit' 
+            : `https://formsubmit.co/ajax/${notificationEmail}`;
+
+        const body: any = {
+            name: formData.name,
+            email: formData.email,
+            message: formData.message,
+            _template: 'table' // FormSubmit specific
+        };
+
+        if (accessKey) {
+            body.access_key = accessKey;
+            body.subject = `New Contact Message: ${formData.subject}`;
+        } else {
+            body._subject = `New Contact Message: ${formData.subject}`;
+            body.subject = formData.subject;
+        }
+        
         try {
-             await fetch(`https://formsubmit.co/ajax/${notificationEmail}`, {
+             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 
                       'Content-Type': 'application/json',
                       'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    _subject: `New Contact Message: ${formData.subject}`,
-                    _template: 'table',
-                    name: formData.name,
-                    email: formData.email,
-                    subject: formData.subject,
-                    message: formData.message
-                })
+                body: JSON.stringify(body)
             });
+            
+            if (!response.ok) throw new Error("Email service failed");
+
         } catch (emailErr) {
             console.warn("Email notification failed to send (DB saved successfully):", emailErr);
         }

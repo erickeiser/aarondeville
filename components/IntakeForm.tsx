@@ -101,21 +101,39 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ content: formContent, id }) => 
 
           if (error) throw error;
 
-          // 2. Send Email Notification (Frontend-only via FormSubmit)
+          // 2. Send Email Notification
+          // Use Web3Forms if Access Key is present, otherwise fallback to FormSubmit
+          const accessKey = formContent.formAccessKey;
           const notificationEmail = formContent.notificationEmail || 'aarondeville@yahoo.com';
+          
+          const endpoint = accessKey 
+            ? 'https://api.web3forms.com/submit' 
+            : `https://formsubmit.co/ajax/${notificationEmail}`;
+
+          const body: any = {
+             ...formData,
+             _template: 'table' // FormSubmit specific
+          };
+
+          if (accessKey) {
+             body.access_key = accessKey;
+             body.subject = `New Intake Form: ${formData.first_name} ${formData.last_name}`;
+          } else {
+             body._subject = `New Intake Form: ${formData.first_name} ${formData.last_name}`;
+          }
+
           try {
-               await fetch(`https://formsubmit.co/ajax/${notificationEmail}`, {
+               const response = await fetch(endpoint, {
                   method: 'POST',
                   headers: { 
                       'Content-Type': 'application/json',
                       'Accept': 'application/json'
                   },
-                  body: JSON.stringify({
-                      _subject: `New Intake Form: ${formData.first_name} ${formData.last_name}`,
-                      _template: 'table',
-                      ...formData
-                  })
+                  body: JSON.stringify(body)
               });
+
+              if (!response.ok) throw new Error("Email service failed");
+
           } catch (emailErr) {
               console.warn("Email notification failed to send (DB saved successfully):", emailErr);
           }

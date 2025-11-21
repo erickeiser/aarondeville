@@ -86,6 +86,7 @@ const defaultSections: { [key in SectionType]: () => Omit<Section, 'id'> } = {
         submitButtonText: 'Submit Intake Form',
         disclaimer: 'By submitting this form, you agree to receive communications about your fitness journey. Your information is kept confidential.',
         notificationEmail: 'aarondeville@yahoo.com',
+        formAccessKey: '',
         sections: [
             {
                 id: 'personal',
@@ -151,6 +152,7 @@ const defaultSections: { [key in SectionType]: () => Omit<Section, 'id'> } = {
           buttonText: 'Send Message',
         },
         notificationEmail: 'aarondeville@yahoo.com',
+        formAccessKey: '',
     }}),
     video: () => ({ type: 'video', content: {
         headline: 'Featured Video',
@@ -262,21 +264,31 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
         fetchedContent.sections = fetchedContent.sections.map(section => {
             if (section.type === 'intakeForm') {
                 const content = section.content as any;
+                let newContent = content;
                 if (!('sections' in content)) {
-                    return { ...section, content: { ...section.content, ...defaultSections.intakeForm().content } };
+                    newContent = { ...newContent, ...defaultSections.intakeForm().content };
                 }
-                 // Migration check for IntakeForm and ContactForm notification email
+                 // Migration check for IntakeForm notification email and access key
                  if (!('notificationEmail' in content)) {
                     const defaultIntake = defaultSections.intakeForm().content as IntakeFormContent;
-                    return { ...section, content: { ...section.content, notificationEmail: defaultIntake.notificationEmail } };
+                    newContent = { ...newContent, notificationEmail: defaultIntake.notificationEmail };
                  }
+                 if (!('formAccessKey' in content)) {
+                    newContent = { ...newContent, formAccessKey: '' };
+                 }
+                 return { ...section, content: newContent };
             }
              if (section.type === 'contact') {
                  const content = section.content as any;
+                 let newContent = content;
                  if (!('notificationEmail' in content)) {
                     const defaultContact = defaultSections.contact().content as ContactContent;
-                    return { ...section, content: { ...section.content, notificationEmail: defaultContact.notificationEmail } };
+                    newContent = { ...newContent, notificationEmail: defaultContact.notificationEmail };
                  }
+                 if (!('formAccessKey' in content)) {
+                    newContent = { ...newContent, formAccessKey: '' };
+                 }
+                 return { ...section, content: newContent };
              }
             return section;
         });

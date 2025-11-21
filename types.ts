@@ -94,6 +94,7 @@ export interface IntakeFormContent {
   submitButtonText: string;
   disclaimer: string;
   notificationEmail?: string;
+  formAccessKey?: string;
 }
 
 export interface ContactContent {
@@ -127,6 +128,7 @@ export interface ContactContent {
     buttonText: string;
   };
   notificationEmail?: string;
+  formAccessKey?: string;
 }
 
 export interface VideoContent {
