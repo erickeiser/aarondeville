@@ -70,6 +70,8 @@ const ContactForm: React.FC<ContactFormProps> = ({ sectionId }) => {
         }
     };
 
+    const hasAccessKey = !!formData.formAccessKey && formData.formAccessKey.trim().length > 0;
+
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800">Edit Contact Section</h2>
@@ -89,14 +91,23 @@ const ContactForm: React.FC<ContactFormProps> = ({ sectionId }) => {
                      <div className="text-xs text-gray-500 mt-2 bg-blue-50 p-2 rounded border border-blue-100">
                         <p className="font-bold text-blue-800 mb-1">Solve "Activation Email" Issues:</p>
                         Use Web3Forms if you aren't receiving submissions or activation emails. <br/>
-                        1. <a href="https://web3forms.com/" target="_blank" className="text-[#8C1E1E] underline font-bold">Click here to get a free Access Key</a>.<br/>
+                        1. <a href="https://web3forms.com/" target="_blank" className="text-[#8C1E1E] underline font-bold">Click here to get a free Access Key</a> using the email you want to receive messages at.<br/>
                         2. Paste the key above.<br/>
                         3. Save Changes.
                      </div>
                 </div>
 
-                <div className="border-t pt-4">
+                <div className={`border-t pt-4 ${hasAccessKey ? 'opacity-60 bg-gray-50 p-3 rounded' : ''}`}>
                     <p className="text-xs font-bold text-gray-400 uppercase mb-2">Legacy Fallback</p>
+                    
+                    {hasAccessKey && (
+                        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-4 text-xs text-yellow-800">
+                            <strong>⚠️ IGNORED:</strong> Because you have entered an Access Key above, the email field below is ignored. 
+                            Web3Forms sends emails to the address associated with the Key. 
+                            To change the receiving email, you must <a href="https://web3forms.com/" target="_blank" className="underline font-bold">generate a NEW Access Key</a> with your new email address.
+                        </div>
+                    )}
+
                     <Input 
                         label="Notification Email Address" 
                         id="notificationEmail" 
