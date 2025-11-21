@@ -149,9 +149,13 @@ const IntakeFormForm: React.FC<IntakeFormFormProps> = ({ sectionId }) => {
                             placeholder="e.g. 842641a0-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                         />
                      </div>
-                     <p className="text-xs text-gray-500 mt-1">
-                        For reliable email delivery, use Web3Forms. <a href="https://web3forms.com/" target="_blank" className="text-[#8C1E1E] underline font-bold">Get your free Access Key here</a>.
-                     </p>
+                     <div className="text-xs text-gray-500 mt-2 bg-blue-50 p-2 rounded border border-blue-100">
+                        <p className="font-bold text-blue-800 mb-1">Solve "Activation Email" Issues:</p>
+                        Use Web3Forms if you aren't receiving submissions or activation emails. <br/>
+                        1. <a href="https://web3forms.com/" target="_blank" className="text-[#8C1E1E] underline font-bold">Click here to get a free Access Key</a>.<br/>
+                        2. Paste the key above.<br/>
+                        3. Save Changes.
+                     </div>
                 </div>
 
                  <div className="border-t pt-4 mb-4">
